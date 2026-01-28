@@ -1,0 +1,26 @@
+{
+  "name": "shen",
+  "version": "1.0.0",
+  "description": "Terrain - TCM Daily Rituals iOS App",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andeslee444/shen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/andeslee444/shen/issues"
+  },
+  "homepage": "https://github.com/andeslee444/shen#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  }
+}

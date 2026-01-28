@@ -74,9 +74,27 @@ When implementing features, follow these principles from the PRD:
 - `filesystem` - File operations
 - `@21st-dev/magic` - UI component generation
 
-## Testing Preferences
+## Commands
 
-- **Browser automation**: Prefer Playwright over Puppeteer for testing and browser automation tasks
+```bash
+# Run all tests
+npm test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests in headed browser
+npm run test:headed
+
+# Run a specific test file
+npx playwright test tests/example.spec.ts
+```
+
+## Testing
+
+- **Browser automation**: Prefer Playwright over Puppeteer
+- Test files go in `tests/` directory with `.spec.ts` extension
+- Configured for Chromium and WebKit (Safari)
 
 ## Next Steps for Development
 
