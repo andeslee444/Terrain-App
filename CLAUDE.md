@@ -4,103 +4,170 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Terrain** is a TCM (Traditional Chinese Medicine) daily rituals iOS app. This repository is currently in the **pre-development planning phase** containing specification documents only.
+**Terrain** is a TCM (Traditional Chinese Medicine) daily rituals iOS app built with SwiftUI and SwiftData. The app determines a user's "Terrain" (body constitution) through a quiz, then delivers personalized daily routines.
 
+**Status**: MVP implemented - onboarding, Today tab, and core features working
 **Positioning**: "Co-Star clarity + Muji calm" for TCM lifestyle routines
 **Target User**: Female-skewing, 19-35, astrology-influenced identity seeker, health-conscious
-**MVP Platform**: iOS (iPhone)
+**Platform**: iOS 17+ (iPhone)
+
+## Quick Start
+
+```bash
+# Open in Xcode and run on simulator
+cd Terrain
+open Terrain.xcodeproj
+# Then press Cmd+R in Xcode
+
+# Or build from command line
+cd Terrain
+xcodebuild -project Terrain.xcodeproj -scheme Terrain \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -configuration Debug build
+
+# Install on running simulator
+xcrun simctl install booted build/Debug-iphonesimulator/Terrain.app
+xcrun simctl launch booted com.terrain.app
+```
 
 ## Repository Structure
 
-This is a planning/specification repository with no source code yet. Documents are in RTF format:
+```
+TCM/
+├── CLAUDE.md                    # This file - AI assistant guidance
+├── Terrain/                     # iOS App (SwiftUI + SwiftData)
+│   ├── Terrain.xcodeproj/       # Xcode project
+│   ├── Package.swift            # SPM for library builds/tests
+│   ├── App/                     # Entry point, MainTabView
+│   ├── Core/
+│   │   ├── Models/              # SwiftData models
+│   │   │   ├── Content/         # Ingredient, Routine, Movement, Lesson, Program, TerrainProfile
+│   │   │   ├── User/            # UserProfile, UserCabinet, DailyLog, ProgressRecord
+│   │   │   └── Shared/          # LocalizedString, Tags, SafetyFlags, MediaAsset
+│   │   ├── Engine/              # TerrainScoringEngine
+│   │   └── Services/            # ContentPackService
+│   ├── Features/
+│   │   ├── Onboarding/          # 7-screen flow: Welcome → Goals → Quiz → Reveal → Safety → Notifications
+│   │   ├── Today/               # Daily routine, movement player, check-in
+│   │   ├── RightNow/            # Quick fixes (UI done, data not wired)
+│   │   ├── Ingredients/         # Cabinet view (UI done, data not wired)
+│   │   ├── Learn/               # Field Guide (UI done, data not wired)
+│   │   └── Progress/            # Streaks, calendar, retake quiz
+│   ├── DesignSystem/
+│   │   ├── Theme/               # TerrainTheme (colors, typography, spacing, animation)
+│   │   └── Components/          # TerrainButton, TerrainCard, TerrainTextField
+│   ├── Resources/
+│   │   └── ContentPacks/        # base-content-pack.json (13 ingredients, 6 lessons)
+│   └── Tests/                   # Unit tests for scoring engine and content parsing
+├── PRD - TCM App.rtf            # Product requirements document
+├── Content Schema JSON.rtf      # JSON schema for content packs
+├── Terrain Scoring Table.rtf    # Quiz scoring algorithm
+└── Copy for Terrain Types.rtf   # Copy templates for terrain types
+```
 
-- `PRD - TCM App.rtf` - Full product requirements document defining vision, personas, UX, and feature specifications
-- `Content Schema JSON.rtf` - JSON Schema defining the content pack structure (ingredients, routines, movements, lessons, programs, terrain profiles)
-- `Terrain Scoring Table.rtf` - Scoring algorithm for the 12-question onboarding quiz that determines user's Terrain type
-- `Copy for Terrain Types.rtf` - Localized copy templates for all 8 primary terrain types and 5 modifiers
+## What's Implemented
 
-## Core Concepts
+### Complete (Production-Ready)
+- **Onboarding flow**: All 7 screens with animations
+- **Terrain Scoring Engine**: 12 questions → 8 types + 5 modifiers (fully tested)
+- **Terrain Reveal**: Animated reveal with superpower/trap/ritual
+- **Today Tab**: Routine capsule, level selector (Full/Lite/Minimum)
+- **Movement Player**: Frame-by-frame with timer, play/pause, auto-advance
+- **Routine Detail Sheet**: Step-by-step with timers
+- **Daily Check-In**: Symptoms, onset, energy tracking
+- **Progress Tab**: Streaks, calendar, retake quiz button
+- **Design System**: Muji-calm theme, all core components
+- **Content Pack Loader**: JSON → SwiftData with DTOs
+- **Notification Scheduling**: Morning/evening reminders
 
-### Terrain System
-Users are assigned a **Terrain** (body constitution type) based on quiz responses. Displayed as:
-- **Primary Type** (8 types): Cold+Deficient, Cold+Balanced, Neutral+Deficient, Neutral+Balanced, Neutral+Excess, Warm+Balanced, Warm+Excess, Warm+Deficient
-- **Nickname**: Human-friendly name (e.g., "Low Flame", "Steady Core", "Overclocked")
-- **Modifier** (optional): Damp, Dry, Stagnation, Shen, or None
+### UI Done, Data Not Wired
+- **Right Now Tab**: 6 quick-need cards (structure only)
+- **Ingredients Tab**: Search, filters, grid (mock data)
+- **Learn Tab**: Topic categories, lesson cards (mock data)
 
-### Scoring Axes
-The quiz scoring uses 5 axes:
-- `cold_heat` (-10 to +10): Negative = cold, Positive = heat
-- `def_excess` (-10 to +10): Negative = deficient, Positive = excess
-- `damp_dry` (-10 to +10): Negative = damp, Positive = dry
-- `qi_stagnation` (0 to 10): Higher = more stuck
-- `shen_unsettled` (0 to 10): Higher = more sleep/mind unsettled
+### Not Started
+- Supabase backend sync
+- Weather API integration
+- Programs (multi-day guided routines)
+- Push notification service
 
-### Content Model
-Content pack schema includes:
-- **Ingredients**: TCM-aligned foods/herbs with axis tags, goals, seasons, regions
-- **Routines**: Eat/drink rituals with steps, swaps, ingredient refs
-- **Movements**: Illustrated exercise flows (3-7 min)
-- **Lessons**: Field Guide educational content
-- **Programs**: Multi-day structured programs (3-30 days)
-- **TerrainProfiles**: Full profile definitions with superpowers, traps, truths
+## Key Technical Decisions
 
-## Design Principles
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Min iOS | 17.0 | Required for SwiftData, Observation framework |
+| Architecture | MVVM + Coordinators | Clean separation, testable |
+| State | @Observable + @AppStorage | Modern Swift concurrency |
+| Persistence | SwiftData | Native, simpler than Core Data |
+| Content | Bundled JSON | Offline-first, fast startup |
 
-When implementing features, follow these principles from the PRD:
+## Terrain System
 
-1. **Co-Star simplicity**: 1 question per screen; "reveal moment" that feels specific
-2. **Muji calm**: Whitespace, subtle motion, low-saturation palette, quiet copy
-3. **Explainable recommendations**: 1-line "why" with expandable tooltips (hybrid terms)
-4. **Culturally grounded**: Provenance blurbs and "common home practice" framing
-5. **Low friction**: Default plan works even if user skips daily logging
-6. **Accessibility**: Pantry-based suggestions; no exotic ingredient dependency
-7. **Safety**: Conservative defaults + safety gate + soft warnings
+### 5 Scoring Axes
+- `cold_heat`: -10 to +10 (cold ↔ heat)
+- `def_excess`: -10 to +10 (deficient ↔ excess)
+- `damp_dry`: -10 to +10 (damp ↔ dry)
+- `qi_stagnation`: 0 to +10 (stuck energy)
+- `shen_unsettled`: 0 to +10 (restless mind/sleep)
+
+### 8 Primary Types
+| Type | Nickname | Thresholds |
+|------|----------|------------|
+| Cold + Deficient | Low Flame | cold ≤ -3, def ≤ -3 |
+| Cold + Balanced | Cool Core | cold ≤ -3, -2 ≤ def ≤ 2 |
+| Neutral + Deficient | Low Battery | -2 ≤ cold ≤ 2, def ≤ -3 |
+| Neutral + Balanced | Steady Core | -2 ≤ cold ≤ 2, -2 ≤ def ≤ 2 |
+| Neutral + Excess | Busy Mind | -2 ≤ cold ≤ 2, def ≥ 3 |
+| Warm + Balanced | High Flame | cold ≥ 3, -2 ≤ def ≤ 2 |
+| Warm + Excess | Overclocked | cold ≥ 3, def ≥ 3 |
+| Warm + Deficient | Bright but Thin | cold ≥ 3, def ≤ -3 |
+
+### 5 Modifiers (priority: Shen > Stagnation > Damp/Dry)
+- **Shen (Restless)**: shen_unsettled ≥ 4
+- **Stagnation (Stuck)**: qi_stagnation ≥ 4
+- **Damp (Heavy)**: damp_dry ≤ -3
+- **Dry (Thirsty)**: damp_dry ≥ 3
+- **None**: No threshold met
+
+## Design System
+
+### Colors (Muji Calm)
+- Background: `#FAFAF8` (warm off-white)
+- Text Primary: `#1A1A1A` (near-black)
+- Accent: `#8B7355` (warm brown)
+- Success: `#7A9E7E`, Warning: `#C9A96E`, Error: `#C97E7E`
+
+### Spacing (8pt base)
+`xxs(4) → xs(8) → sm(12) → md(16) → lg(24) → xl(32) → xxl(48) → xxxl(64)`
+
+### Animation
+- Quick: 0.15s (micro-interactions)
+- Standard: 0.3s (transitions)
+- Reveal: 0.5s (signature moments)
 
 ## Content Tone
-
 - Muji-calm, chic, informational
-- Avoid snark
-- Short sentences
-- Gentle confidence
+- Short sentences, gentle confidence
 - Never say "diagnosis" - use "profile," "terrain," "pattern"
-- Surface human terms + light TCM; expand with proper TCM framework via tooltips
-
-## MCP Servers Available
-
-- `puppeteer` - Browser automation (prefer Playwright when possible)
-- `browser-tools-mcp` - Browser debugging
-- `supabase` - Database operations
-- `shadcn-ui` - UI component library
-- `filesystem` - File operations
-- `@21st-dev/magic` - UI component generation
-
-## Commands
-
-```bash
-# Run all tests
-npm test
-
-# Run tests with UI
-npm run test:ui
-
-# Run tests in headed browser
-npm run test:headed
-
-# Run a specific test file
-npx playwright test tests/example.spec.ts
-```
+- Surface human terms; expand with TCM via tooltips
 
 ## Testing
 
-- **Browser automation**: Prefer Playwright over Puppeteer
-- Test files go in `tests/` directory with `.spec.ts` extension
-- Configured for Chromium and WebKit (Safari)
+```bash
+# Build for simulator (validates compilation)
+cd Terrain
+swift build --sdk $(xcrun --sdk iphonesimulator --show-sdk-path) \
+  --triple arm64-apple-ios17.0-simulator
 
-## Next Steps for Development
+# Run unit tests (requires Xcode)
+xcodebuild test -project Terrain.xcodeproj -scheme Terrain \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+```
 
-When development begins, the app will need:
-1. iOS app (Swift/SwiftUI) following the PRD specifications
-2. Backend API for content delivery and user profiles
-3. Content pipeline to validate/transform the JSON content packs
-4. Onboarding quiz implementing the scoring algorithm from `Terrain Scoring Table.rtf`
-5. Content authoring following the schema in `Content Schema JSON.rtf`
+## Next Steps (See TODO.md)
+
+1. Wire Learn tab to content pack lessons
+2. Wire Ingredients tab to content pack ingredients
+3. Add more terrain profiles to content pack
+4. Implement Programs feature
+5. Set up Supabase for sync
