@@ -175,6 +175,236 @@
         "common_in": ["cantonese_home_soups", "taiwaneseHomeStyle"]
       },
       "review": { "status": "draft" }
+    },
+    {
+      "id": "cinnamon",
+      "name": {
+        "common": { "en-US": "Cinnamon" },
+        "pinyin": "ròu guì",
+        "hanzi": "肉桂"
+      },
+      "category": "spice",
+      "tags": ["warming", "supports_digestion"],
+      "goals": ["energy", "digestion"],
+      "seasons": ["autumn", "winter"],
+      "regions": ["pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Strongly warming and supports circulation. Helps with cold hands and feet." },
+        "tcm": { "en-US": "Warms the Kidney Yang, dispels cold, and promotes circulation of Qi and Blood." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Add a pinch to warm drinks or oatmeal" }, "prep_time_min": 1, "method_tags": ["stir_in"] },
+          { "text": { "en-US": "Simmer a stick in tea" }, "prep_time_min": 10, "method_tags": ["steep"] }
+        ],
+        "typical_amount": { "en-US": "1/4 teaspoon ground or 1 small stick" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Use sparingly if you run hot or have night sweats." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Cinnamon has been used in Chinese medicine for thousands of years as a powerful warming herb." },
+        "common_in": ["northern_winter_warmth", "pan_chinese_common"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "pear",
+      "name": {
+        "common": { "en-US": "Pear" },
+        "pinyin": "lí",
+        "hanzi": "梨"
+      },
+      "category": "fruit",
+      "tags": ["cooling", "moistens_dryness"],
+      "goals": ["skin", "sleep"],
+      "seasons": ["autumn", "winter"],
+      "regions": ["pan_chinese_common", "northern_winter_warmth"],
+      "why_it_helps": {
+        "plain": { "en-US": "Moistening and cooling. Excellent for dry coughs and dry skin." },
+        "tcm": { "en-US": "Generates fluids, moistens the Lungs, and clears heat." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Eat fresh as a snack" }, "prep_time_min": 0, "method_tags": ["raw"] },
+          { "text": { "en-US": "Steam with rock sugar and goji berries" }, "prep_time_min": 30, "method_tags": ["steam"] }
+        ],
+        "typical_amount": { "en-US": "1 medium pear" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Avoid if you have loose stools or feel very cold." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Steamed pear with rock sugar is a beloved home remedy for dry coughs in Chinese households." },
+        "common_in": ["pan_chinese_common", "cantonese_home_soups"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "honey",
+      "name": {
+        "common": { "en-US": "Honey" },
+        "pinyin": "fēng mì",
+        "hanzi": "蜂蜜"
+      },
+      "category": "other",
+      "tags": ["moistens_dryness", "supports_deficiency"],
+      "goals": ["energy", "digestion", "skin"],
+      "seasons": ["all_year"],
+      "regions": ["pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Gentle sweetener that moistens dryness and soothes the throat." },
+        "tcm": { "en-US": "Tonifies the Middle Jiao, moistens dryness, and harmonizes other ingredients." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Add to warm (not hot) drinks" }, "prep_time_min": 1, "method_tags": ["stir_in"] },
+          { "text": { "en-US": "Drizzle on porridge or fruit" }, "prep_time_min": 1, "method_tags": ["topping"] }
+        ],
+        "typical_amount": { "en-US": "1-2 teaspoons" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Avoid if you have excess dampness or feel bloated." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Honey has been used in Chinese medicine for millennia as a gentle tonic and harmonizer." },
+        "common_in": ["pan_chinese_common"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "chamomile",
+      "name": {
+        "common": { "en-US": "Chamomile" },
+        "pinyin": "yáng gān jú",
+        "hanzi": "洋甘菊"
+      },
+      "category": "tea",
+      "tags": ["calms_shen", "moves_qi"],
+      "goals": ["sleep", "stress"],
+      "seasons": ["all_year"],
+      "regions": ["pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Gently calming and helps with sleep. Soothes digestive discomfort." },
+        "tcm": { "en-US": "Calms the Shen, soothes the Liver Qi, and relaxes tension." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Steep 1-2 teaspoons in hot water for 5 minutes" }, "prep_time_min": 5, "method_tags": ["steep"] }
+        ],
+        "typical_amount": { "en-US": "1-2 teaspoons dried flowers" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Avoid if you have ragweed allergies." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "While not traditionally Chinese, chamomile has been adopted into modern TCM practice for its calming properties." },
+        "common_in": ["pan_chinese_common"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "chrysanthemum",
+      "name": {
+        "common": { "en-US": "Chrysanthemum" },
+        "pinyin": "jú huā",
+        "hanzi": "菊花"
+      },
+      "category": "tea",
+      "tags": ["cooling", "calms_shen"],
+      "goals": ["stress", "skin"],
+      "seasons": ["summer", "autumn"],
+      "regions": ["jiangnan_gentle", "pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Cooling and calming. Good for red eyes, headaches, and stress." },
+        "tcm": { "en-US": "Clears heat from the Liver, benefits the eyes, and calms rising Yang." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Steep a small handful in hot water" }, "prep_time_min": 5, "method_tags": ["steep"] },
+          { "text": { "en-US": "Combine with goji berries for a classic tea" }, "prep_time_min": 5, "method_tags": ["steep"] }
+        ],
+        "typical_amount": { "en-US": "5-8 dried flowers" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Use less if you feel cold or have loose stools." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Chrysanthemum tea is one of the most popular herbal teas in China, especially in summer." },
+        "common_in": ["jiangnan_gentle", "cantonese_home_soups"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "rice",
+      "name": {
+        "common": { "en-US": "White Rice" },
+        "pinyin": "bái mǐ",
+        "hanzi": "白米"
+      },
+      "category": "grain",
+      "tags": ["supports_deficiency", "supports_digestion"],
+      "goals": ["digestion", "energy"],
+      "seasons": ["all_year"],
+      "regions": ["pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Easy to digest and provides gentle, sustained energy." },
+        "tcm": { "en-US": "Tonifies Qi, supports the Spleen and Stomach, and generates fluids." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Cook into congee with plenty of water" }, "prep_time_min": 30, "method_tags": ["congee"] },
+          { "text": { "en-US": "Steam as a side dish" }, "prep_time_min": 20, "method_tags": ["steam"] }
+        ],
+        "typical_amount": { "en-US": "1/2 cup dry rice" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Generally safe for all constitutions." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Rice is the foundation of Chinese cuisine and the base for countless healing dishes." },
+        "common_in": ["pan_chinese_common"]
+      },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "walnut",
+      "name": {
+        "common": { "en-US": "Walnut" },
+        "pinyin": "hé táo",
+        "hanzi": "核桃"
+      },
+      "category": "other",
+      "tags": ["warming", "supports_deficiency"],
+      "goals": ["energy", "sleep"],
+      "seasons": ["autumn", "winter"],
+      "regions": ["northern_winter_warmth", "pan_chinese_common"],
+      "why_it_helps": {
+        "plain": { "en-US": "Nourishing and warming. Supports brain function and kidney energy." },
+        "tcm": { "en-US": "Tonifies Kidney Yang, nourishes the Brain, and moistens the Intestines." }
+      },
+      "how_to_use": {
+        "quick_uses": [
+          { "text": { "en-US": "Eat a small handful as a snack" }, "prep_time_min": 0, "method_tags": ["raw"] },
+          { "text": { "en-US": "Add to porridge or smoothies" }, "prep_time_min": 5, "method_tags": ["stir_in"] }
+        ],
+        "typical_amount": { "en-US": "5-7 walnut halves" }
+      },
+      "cautions": {
+        "flags": [],
+        "text": { "en-US": "Limit if you have loose stools or run hot." }
+      },
+      "cultural_context": {
+        "blurb": { "en-US": "Walnuts are considered brain food in Chinese culture, valued for their resemblance to the brain." },
+        "common_in": ["northern_winter_warmth", "pan_chinese_common"]
+      },
+      "review": { "status": "draft" }
     }
   ],
   "routines": [
@@ -291,6 +521,93 @@
       ],
       "takeaway": { "one_line": { "en-US": "Understanding your temperature tendency helps you choose foods and habits that balance your body." } },
       "cta": { "label": { "en-US": "See your routine" }, "action": "open_today" },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "understanding-damp-dry",
+      "title": { "en-US": "Damp vs Dry" },
+      "topic": "damp_dry",
+      "body": [
+        { "type": "paragraph", "text": { "en-US": "In TCM, 'dampness' and 'dryness' describe your body's moisture balance—not just how thirsty you feel." } },
+        { "type": "paragraph", "text": { "en-US": "Dampness shows up as heaviness, puffiness, or sluggish digestion. You might feel foggy-headed or notice sticky stools. Dryness appears as dry skin, lips, or throat, and sometimes constipation." } },
+        { "type": "callout", "text": { "en-US": "Your environment matters too—humid climates can increase dampness, while dry, heated rooms can worsen dryness." } },
+        { "type": "bullets", "bullets": [
+          { "en-US": "Damp signs: feeling heavy, puffy, bloated, foggy-headed, sticky stools" },
+          { "en-US": "Dry signs: dry skin, dry throat, thirst, constipation, dry eyes" }
+        ] }
+      ],
+      "takeaway": { "one_line": { "en-US": "Knowing your moisture tendency helps you choose foods that restore balance—drying foods for dampness, moistening foods for dryness." } },
+      "cta": { "label": { "en-US": "See your ingredients" }, "action": "open_ingredients" },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "what-is-shen",
+      "title": { "en-US": "What is Shen?" },
+      "topic": "shen",
+      "body": [
+        { "type": "paragraph", "text": { "en-US": "Shen is often translated as 'spirit' or 'mind'—but in TCM, it's more specific. It refers to your mental clarity, emotional balance, and quality of sleep." } },
+        { "type": "paragraph", "text": { "en-US": "When your Shen is settled, you feel calm, focused, and sleep deeply. When it's unsettled, you might feel anxious, scattered, or have trouble falling or staying asleep." } },
+        { "type": "callout", "text": { "en-US": "The Heart 'houses' the Shen in TCM. That's why heart-calming practices help with sleep and anxiety." } },
+        { "type": "bullets", "bullets": [
+          { "en-US": "Settled Shen: good sleep, calm mind, emotional resilience, clear thinking" },
+          { "en-US": "Unsettled Shen: racing thoughts, anxiety, insomnia, vivid dreams, easily startled" }
+        ] }
+      ],
+      "takeaway": { "one_line": { "en-US": "Calming the Shen isn't just about relaxation—it's about creating conditions for deep rest and mental clarity." } },
+      "cta": { "label": { "en-US": "Try a calming routine" }, "action": "open_today" },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "understanding-qi",
+      "title": { "en-US": "Understanding Qi" },
+      "topic": "qi_flow",
+      "body": [
+        { "type": "paragraph", "text": { "en-US": "Qi is often translated as 'energy,' but that oversimplifies it. Think of Qi as your body's functional capacity—the ability to do, move, and transform." } },
+        { "type": "paragraph", "text": { "en-US": "When Qi flows smoothly, you feel energized and emotionally balanced. When Qi gets stuck (stagnates), you might feel irritable, tense, or notice sighing and chest tightness." } },
+        { "type": "callout", "text": { "en-US": "Stress is the #1 cause of Qi stagnation. Movement, breath, and aromatic foods help get things flowing again." } },
+        { "type": "bullets", "bullets": [
+          { "en-US": "Smooth Qi: steady energy, even mood, good digestion, flexibility" },
+          { "en-US": "Stuck Qi: irritability, tension, sighing, feeling 'stuck,' PMS symptoms" }
+        ] }
+      ],
+      "takeaway": { "one_line": { "en-US": "Moving stuck Qi is one of the most immediate ways to feel better—a walk, some stretches, or aromatic tea can help." } },
+      "cta": { "label": { "en-US": "Try a movement" }, "action": "open_today" },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "warming-methods",
+      "title": { "en-US": "Warming Methods" },
+      "topic": "methods",
+      "body": [
+        { "type": "paragraph", "text": { "en-US": "How you prepare food matters as much as what you eat. Warming methods add heat energy to foods, making them easier to digest and better for cold constitutions." } },
+        { "type": "paragraph", "text": { "en-US": "Cooking methods like simmering, stewing, roasting, and sautéing add warmth. Even room-temperature foods are warmer than cold ones straight from the fridge." } },
+        { "type": "bullets", "bullets": [
+          { "en-US": "Most warming: grilling, roasting, long simmering" },
+          { "en-US": "Moderately warming: sautéing, steaming, short boiling" },
+          { "en-US": "Neutral: room temperature foods" },
+          { "en-US": "Cooling: raw, chilled, frozen" }
+        ] }
+      ],
+      "takeaway": { "one_line": { "en-US": "If you run cold, simply cooking your food more thoroughly can make a real difference—try avoiding raw salads and cold drinks." } },
+      "cta": { "label": { "en-US": "See warming ingredients" }, "action": "open_ingredients" },
+      "review": { "status": "draft" }
+    },
+    {
+      "id": "cooling-methods",
+      "title": { "en-US": "Cooling Methods" },
+      "topic": "methods",
+      "body": [
+        { "type": "paragraph", "text": { "en-US": "If you run warm, how you prepare food can help cool you down—without going to extremes like ice-cold drinks (which can actually cause problems)." } },
+        { "type": "paragraph", "text": { "en-US": "Light cooking methods like quick steaming, blanching, or eating foods at room temperature preserve cooling properties. Raw foods are cooling, but only if your digestion is strong." } },
+        { "type": "callout", "text": { "en-US": "Ice-cold drinks can shock your system. Room temperature or cool (not icy) is better for true cooling." } },
+        { "type": "bullets", "bullets": [
+          { "en-US": "Cooling foods: cucumber, mung bean, watermelon, pear, chrysanthemum" },
+          { "en-US": "Cooling methods: raw (if digestion is strong), steaming, blanching" },
+          { "en-US": "Avoid: overly spicy, fried, or grilled foods when you're too warm" }
+        ] }
+      ],
+      "takeaway": { "one_line": { "en-US": "Gentle cooling is more sustainable than extreme cold—your body will thank you." } },
+      "cta": { "label": { "en-US": "See cooling ingredients" }, "action": "open_ingredients" },
       "review": { "status": "draft" }
     }
   ],
