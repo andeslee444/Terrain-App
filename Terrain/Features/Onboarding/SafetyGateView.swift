@@ -24,24 +24,32 @@ struct SafetyGateView: View {
             }
             .padding(.horizontal, theme.spacing.lg)
 
-            // Title
+            // Title — warm and reassuring
             VStack(spacing: theme.spacing.sm) {
-                Text("Any of these apply to you?")
+                Text("Help us keep things safe")
                     .font(theme.typography.headlineLarge)
                     .foregroundColor(theme.colors.textPrimary)
                     .multilineTextAlignment(.center)
 
-                Text("This helps us personalize safely. None of this is required.")
+                Text("We'll adjust recommendations if any of these apply.")
                     .font(theme.typography.bodyMedium)
                     .foregroundColor(theme.colors.textSecondary)
+                    .multilineTextAlignment(.center)
+
+                Text("This is optional — you can always update in Settings.")
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textTertiary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, theme.spacing.lg)
             .opacity(showContent ? 1 : 0)
 
-            // Options
+            // Options — grouped by category
             ScrollView {
-                VStack(spacing: theme.spacing.sm) {
+                VStack(spacing: theme.spacing.md) {
+                    // Pregnancy & nursing
+                    SafetySectionLabel(title: "Pregnancy & Nursing")
+
                     SafetyOptionRow(
                         title: "Pregnant",
                         isSelected: preferences.isPregnant,
@@ -54,11 +62,8 @@ struct SafetyGateView: View {
                         onToggle: { preferences.isBreastfeeding.toggle() }
                     )
 
-                    SafetyOptionRow(
-                        title: "Acid reflux / GERD",
-                        isSelected: preferences.hasGerd,
-                        onToggle: { preferences.hasGerd.toggle() }
-                    )
+                    // Medications
+                    SafetySectionLabel(title: "Medications")
 
                     SafetyOptionRow(
                         title: "Taking blood thinners",
@@ -82,6 +87,15 @@ struct SafetyGateView: View {
                         title: "Taking diabetes meds",
                         isSelected: preferences.takesDiabetesMeds,
                         onToggle: { preferences.takesDiabetesMeds.toggle() }
+                    )
+
+                    // Dietary
+                    SafetySectionLabel(title: "Dietary")
+
+                    SafetyOptionRow(
+                        title: "Acid reflux / GERD",
+                        isSelected: preferences.hasGerd,
+                        onToggle: { preferences.hasGerd.toggle() }
                     )
 
                     SafetyOptionRow(
@@ -158,6 +172,22 @@ struct SafetyOptionRow: View {
             .cornerRadius(theme.cornerRadius.large)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct SafetySectionLabel: View {
+    let title: String
+
+    @Environment(\.terrainTheme) private var theme
+
+    var body: some View {
+        Text(title)
+            .font(theme.typography.labelSmall)
+            .foregroundColor(theme.colors.textTertiary)
+            .textCase(.uppercase)
+            .tracking(0.5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, theme.spacing.xs)
     }
 }
 

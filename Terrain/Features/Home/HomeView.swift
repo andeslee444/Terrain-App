@@ -138,29 +138,29 @@ struct HomeView: View {
                     // 4. Type block
                     TypeBlockView(components: typeBlockComponents)
 
+                    // 5. CTA — primary action, prominent and early
+                    CapsuleStartCTA(
+                        onStart: { navigateToDo() }
+                    )
+                    .accessibilityLabel("Start your daily practice")
+                    .accessibilityHint("Navigate to the Do tab to begin")
+
                     // Divider: identity zone → guidance zone
                     Divider()
                         .padding(.horizontal, theme.spacing.xl)
 
-                    // 5. Do/Don't
+                    // 6. Do/Don't
                     DoDontView(dos: doDont.dos, donts: doDont.donts)
                         .accessibilityLabel("Do and Don't recommendations for your terrain")
 
-                    // 6. Areas of life
+                    // 7. Areas of life
                     AreasOfLifeView(areas: areas)
 
-                    // 7. Seasonal note
+                    // 8. Seasonal note
                     SeasonalCardView(content: seasonalNote)
 
-                    // 8. Theme today
+                    // 9. Theme today
                     ThemeTodayView(content: theme_)
-
-                    // 9. Capsule CTA
-                    CapsuleStartCTA(
-                        onStart: { navigateToDo() }
-                    )
-                    .accessibilityLabel("Start your daily routine")
-                    .accessibilityHint("Navigate to the Do tab to begin")
 
                     Spacer(minLength: theme.spacing.xxl)
                 }

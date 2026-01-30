@@ -178,14 +178,17 @@ struct OnboardingCoordinatorView: View {
                     case .account:
                         AuthView(
                             syncService: syncService,
-                            onContinueWithoutAccount: { completeOnboarding() }
+                            onContinueWithoutAccount: { coordinator.nextStep() }
                         )
                         .onChange(of: syncService.isAuthenticated) { _, isAuth in
-                            if isAuth { completeOnboarding() }
+                            if isAuth { coordinator.nextStep() }
                         }
 
                     case .complete:
-                        EmptyView()
+                        OnboardingCompleteView(
+                            nickname: coordinator.scoringResult?.primaryType.nickname ?? "Your Type",
+                            onStart: { completeOnboarding() }
+                        )
                     }
                 }
                 .transition(.asymmetric(

@@ -39,7 +39,7 @@ final class NavigationCoordinator {
         var icon: String {
             switch self {
             case .home: return "house.fill"
-            case .do: return "play.circle.fill"
+            case .do: return "figure.mind.and.body"
             case .ingredients: return "leaf.fill"
             case .learn: return "book.fill"
             case .you: return "person.fill"

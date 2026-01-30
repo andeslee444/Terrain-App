@@ -28,36 +28,8 @@ struct DateBarView: View {
                 .foregroundColor(theme.colors.textSecondary)
 
             Spacer()
-
-            // Daily tone pill
-            Button(action: { onToneTap?() }) {
-                HStack(spacing: theme.spacing.xxs) {
-                    Text(toneText)
-                        .font(theme.typography.labelSmall)
-                        .foregroundColor(theme.colors.textSecondary)
-
-                    if onToneTap != nil {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 8, weight: .semibold))
-                            .foregroundColor(theme.colors.textTertiary)
-                    }
-                }
-                .padding(.horizontal, theme.spacing.sm)
-                .padding(.vertical, theme.spacing.xxs)
-                .background(theme.colors.backgroundSecondary)
-                .cornerRadius(theme.cornerRadius.full)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .disabled(onToneTap == nil)
         }
         .padding(.horizontal, theme.spacing.lg)
-    }
-
-    private var toneText: String {
-        if let env = dailyTone.environmentalNote {
-            return "\(dailyTone.label) · \(env)"
-        }
-        return dailyTone.label
     }
 }
 

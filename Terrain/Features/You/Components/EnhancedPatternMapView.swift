@@ -25,6 +25,15 @@ struct EnhancedPatternMapView: View {
         let maxVal: Int
     }
 
+    /// Plain-language explanation for each axis (shown beneath the axis label)
+    private static let axisPlainLabels: [String] = [
+        "Temperature tendency (cold ← → warm)",
+        "Energy reserves (depleted ← → overflowing)",
+        "Fluid balance (heavy/damp ← → dry/parched)",
+        "Flow (stuck ← → free-flowing)",
+        "Mind & sleep (restless ← → settled)"
+    ]
+
     private var axisConfigs: [AxisConfig] {
         [
             AxisConfig(leftLabel: "Cold", rightLabel: "Hot", value: vector.coldHeat, minVal: -10, maxVal: 10),
@@ -39,25 +48,33 @@ struct EnhancedPatternMapView: View {
         VStack(spacing: theme.spacing.md) {
             ForEach(Array(readout.axes.enumerated()), id: \.offset) { index, axis in
                 VStack(alignment: .leading, spacing: theme.spacing.xxs) {
-                    // Axis label + tooltip button
-                    HStack {
-                        Text(axis.label)
-                            .font(theme.typography.labelSmall)
-                            .foregroundColor(theme.colors.textTertiary)
-
-                        Spacer()
-
-                        Button {
-                            withAnimation(theme.animation.quick) {
-                                activeTooltipIndex = activeTooltipIndex == index ? nil : index
-                            }
-                            HapticManager.light()
-                        } label: {
-                            Image(systemName: "questionmark.circle")
-                                .font(.system(size: 12))
+                    // Axis label + plain-language explanation + tooltip
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(axis.label)
+                                .font(theme.typography.labelSmall)
                                 .foregroundColor(theme.colors.textTertiary)
+
+                            Spacer()
+
+                            Button {
+                                withAnimation(theme.animation.quick) {
+                                    activeTooltipIndex = activeTooltipIndex == index ? nil : index
+                                }
+                                HapticManager.light()
+                            } label: {
+                                Image(systemName: "questionmark.circle")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(theme.colors.textTertiary)
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        .buttonStyle(PlainButtonStyle())
+
+                        if index < Self.axisPlainLabels.count {
+                            Text(Self.axisPlainLabels[index])
+                                .font(theme.typography.caption)
+                                .foregroundColor(theme.colors.textTertiary.opacity(0.7))
+                        }
                     }
 
                     // Value text from ConstitutionReadout

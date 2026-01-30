@@ -29,8 +29,8 @@ struct DoDontView: View {
                         .foregroundColor(theme.colors.textPrimary)
                 }
 
-                ForEach(dos) { item in
-                    DoDontRow(item: item, isDo: true)
+                ForEach(Array(dos.enumerated()), id: \.element.id) { index, item in
+                    DoDontRow(item: item, isDo: true, startExpanded: index == 0 && item.whyForYou != nil)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,13 +71,16 @@ struct DoDontView: View {
 struct DoDontRow: View {
     let item: DoDontItem
     let isDo: Bool
+    let startExpanded: Bool
 
     @Environment(\.terrainTheme) private var theme
     @State private var isExpanded = false
 
-    init(item: DoDontItem, isDo: Bool) {
+    init(item: DoDontItem, isDo: Bool, startExpanded: Bool = false) {
         self.item = item
         self.isDo = isDo
+        self.startExpanded = startExpanded
+        self._isExpanded = State(initialValue: startExpanded)
     }
 
     var body: some View {
@@ -102,9 +105,9 @@ struct DoDontRow: View {
 
                     if item.whyForYou != nil {
                         Spacer(minLength: 2)
-                        Image(systemName: isExpanded ? "chevron.up" : "info.circle")
-                            .font(.system(size: 10))
-                            .foregroundColor(theme.colors.textTertiary)
+                        Text(isExpanded ? "▴" : "Why?")
+                            .font(theme.typography.caption)
+                            .foregroundColor(theme.colors.accent.opacity(0.7))
                     }
                 }
             }

@@ -49,6 +49,7 @@
 		E10000070000000000000005 /* SafetyGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000070000000000000005 /* SafetyGateView.swift */; };
 		E10000070000000000000006 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000070000000000000006 /* NotificationsView.swift */; };
 		E10000070000000000000007 /* OnboardingCoordinatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000070000000000000007 /* OnboardingCoordinatorView.swift */; };
+		CC00000700000000000000A1 /* OnboardingCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000700000000000000A2 /* OnboardingCompleteView.swift */; };
 
 		/* Features/Today */
 		E10000080000000000000001 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000080000000000000001 /* TodayView.swift */; };
@@ -195,6 +196,7 @@
 		E20000070000000000000005 /* SafetyGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyGateView.swift; sourceTree = "<group>"; };
 		E20000070000000000000006 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		E20000070000000000000007 /* OnboardingCoordinatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinatorView.swift; sourceTree = "<group>"; };
+		CC00000700000000000000A2 /* OnboardingCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompleteView.swift; sourceTree = "<group>"; };
 
 		/* Features/Today */
 		E20000080000000000000001 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
@@ -573,6 +575,7 @@
 				E20000070000000000000005 /* SafetyGateView.swift */,
 				E20000070000000000000006 /* NotificationsView.swift */,
 				E20000070000000000000007 /* OnboardingCoordinatorView.swift */,
+				CC00000700000000000000A2 /* OnboardingCompleteView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -813,6 +816,7 @@
 				E10000070000000000000005 /* SafetyGateView.swift in Sources */,
 				E10000070000000000000006 /* NotificationsView.swift in Sources */,
 				E10000070000000000000007 /* OnboardingCoordinatorView.swift in Sources */,
+				CC00000700000000000000A1 /* OnboardingCompleteView.swift in Sources */,
 				E10000080000000000000001 /* TodayView.swift in Sources */,
 				E10000080000000000000002 /* DailyCheckInSheet.swift in Sources */,
 				E10000080000000000000003 /* RoutineDetailSheet.swift in Sources */,

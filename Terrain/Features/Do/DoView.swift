@@ -210,10 +210,15 @@ struct DoView: View {
                             levelSelector
 
                             Text(levelCoachingNote)
-                                .font(theme.typography.caption)
-                                .foregroundColor(theme.colors.textTertiary)
+                                .font(theme.typography.bodySmall)
+                                .foregroundColor(theme.colors.textSecondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, theme.spacing.xl)
+                                .padding(.horizontal, theme.spacing.md)
+                                .padding(.vertical, theme.spacing.sm)
+                                .frame(maxWidth: .infinity)
+                                .background(theme.colors.backgroundSecondary)
+                                .cornerRadius(theme.cornerRadius.medium)
+                                .padding(.horizontal, theme.spacing.lg)
                         }
 
                         // Capsule Section
@@ -268,19 +273,13 @@ struct DoView: View {
                     }
                     HapticManager.selection()
                 }) {
-                    VStack(spacing: 2) {
-                        Text(level.displayName)
-                            .font(theme.typography.labelMedium)
-                            .foregroundColor(selectedLevel == level ? theme.colors.textInverted : theme.colors.textSecondary)
-
-                        Text(level.durationDescription)
-                            .font(theme.typography.caption)
-                            .foregroundColor(selectedLevel == level ? theme.colors.textInverted.opacity(0.8) : theme.colors.textTertiary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, theme.spacing.sm)
-                    .background(selectedLevel == level ? theme.colors.accent : Color.clear)
-                    .cornerRadius(theme.cornerRadius.medium)
+                    Text("\(level.displayName) · \(level.durationDescription)")
+                        .font(theme.typography.labelMedium)
+                        .foregroundColor(selectedLevel == level ? theme.colors.textInverted : theme.colors.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, theme.spacing.sm)
+                        .background(selectedLevel == level ? theme.colors.accent : Color.clear)
+                        .cornerRadius(theme.cornerRadius.medium)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
@@ -295,7 +294,7 @@ struct DoView: View {
 
     private var capsuleSection: some View {
         VStack(spacing: theme.spacing.md) {
-            Text("Your Daily Capsule")
+            Text("Today's Practice")
                 .font(theme.typography.headlineSmall)
                 .foregroundColor(theme.colors.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -398,16 +397,19 @@ struct DoView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, theme.spacing.lg)
 
-            // Quick needs grid — ordered by symptom relevance
-            VStack(spacing: theme.spacing.sm) {
+            // Quick needs grid — compact 2-column layout
+            let columns = [GridItem(.flexible(), spacing: theme.spacing.sm),
+                           GridItem(.flexible(), spacing: theme.spacing.sm)]
+
+            LazyVGrid(columns: columns, spacing: theme.spacing.sm) {
                 ForEach(orderedNeeds) { need in
-                    QuickNeedCard(
+                    QuickNeedCompactCard(
                         need: need,
                         isSelected: selectedNeed == need,
                         isCompleted: isNeedCompletedToday(need),
                         onTap: {
                             withAnimation(theme.animation.standard) {
-                                selectedNeed = need
+                                selectedNeed = selectedNeed == need ? nil : need
                             }
                             HapticManager.selection()
                         }
@@ -604,7 +606,7 @@ struct DoView: View {
             }
             HapticManager.success()
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 withAnimation(theme.animation.standard) {
                     showCompletionFeedback = false
                 }

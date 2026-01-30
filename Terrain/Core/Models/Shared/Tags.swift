@@ -36,9 +36,9 @@ enum Goal: String, Codable, CaseIterable, Identifiable {
         case .sleep: return "moon.fill"
         case .digestion: return "leaf.fill"
         case .energy: return "bolt.fill"
-        case .stress: return "heart.fill"
+        case .stress: return "wind"
         case .skin: return "sparkles"
-        case .menstrualComfort: return "waveform.path"
+        case .menstrualComfort: return "drop.fill"
         }
     }
 

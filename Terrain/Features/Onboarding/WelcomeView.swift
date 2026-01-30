@@ -31,49 +31,15 @@ struct WelcomeView: View {
             .opacity(showContent ? 1 : 0)
             .offset(y: showContent ? 0 : 20)
 
-            // Subtitle
-            VStack(spacing: theme.spacing.sm) {
-                Text("Discover your terrain and get")
-                    .font(theme.typography.bodyLarge)
-                    .foregroundColor(theme.colors.textSecondary)
-
-                Text("personalized daily rituals")
-                    .font(theme.typography.bodyLarge)
-                    .foregroundColor(theme.colors.textSecondary)
-
-                Text("rooted in Traditional Chinese Medicine.")
-                    .font(theme.typography.bodyLarge)
-                    .foregroundColor(theme.colors.textSecondary)
-            }
-            .multilineTextAlignment(.center)
-            .opacity(showContent ? 1 : 0)
-            .offset(y: showContent ? 0 : 20)
-            .animation(theme.animation.reveal.delay(0.2), value: showContent)
-
-            Spacer()
-
-            // Features
-            VStack(spacing: theme.spacing.md) {
-                FeatureRow(
-                    icon: "person.fill.viewfinder",
-                    title: "Know your terrain",
-                    description: "3-minute assessment"
-                )
-
-                FeatureRow(
-                    icon: "sun.horizon.fill",
-                    title: "Daily rituals",
-                    description: "Personalized eat, drink, move"
-                )
-
-                FeatureRow(
-                    icon: "leaf.fill",
-                    title: "Build your cabinet",
-                    description: "Simple, accessible ingredients"
-                )
-            }
-            .opacity(showContent ? 1 : 0)
-            .animation(theme.animation.reveal.delay(0.4), value: showContent)
+            // Single poetic subtitle — mystique over features
+            Text("Take a 3-minute assessment.\nGet daily rituals rooted in\nTraditional Chinese Medicine.")
+                .font(theme.typography.bodyLarge)
+                .foregroundColor(theme.colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+                .opacity(showContent ? 1 : 0)
+                .offset(y: showContent ? 0 : 20)
+                .animation(theme.animation.reveal.delay(0.2), value: showContent)
 
             Spacer()
 
@@ -99,35 +65,6 @@ struct WelcomeView: View {
     }
 }
 
-struct FeatureRow: View {
-    let icon: String
-    let title: String
-    let description: String
-
-    @Environment(\.terrainTheme) private var theme
-
-    var body: some View {
-        HStack(spacing: theme.spacing.md) {
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(theme.colors.accent)
-                .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(theme.typography.labelLarge)
-                    .foregroundColor(theme.colors.textPrimary)
-
-                Text(description)
-                    .font(theme.typography.bodySmall)
-                    .foregroundColor(theme.colors.textSecondary)
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, theme.spacing.md)
-    }
-}
 
 #Preview {
     WelcomeView(onContinue: {})

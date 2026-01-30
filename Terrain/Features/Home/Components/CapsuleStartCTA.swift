@@ -19,10 +19,10 @@ struct CapsuleStartCTA: View {
             onStart()
         }) {
             HStack(spacing: theme.spacing.xs) {
-                Image(systemName: "play.circle.fill")
+                Image(systemName: "circle.inset.filled")
                     .font(.system(size: 18))
 
-                Text("Start Your Capsule")
+                Text("Start Today's Practice")
                     .font(theme.typography.labelLarge)
             }
             .foregroundColor(theme.colors.textInverted)

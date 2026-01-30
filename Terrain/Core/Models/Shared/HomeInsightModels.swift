@@ -225,6 +225,7 @@ struct TypeBlockComponents: Codable, Hashable {
     let temperature: TemperatureChip
     let reserve: ReserveChip
     let modifier: ModifierChip?
+    let nickname: String
 
     enum TemperatureChip: String, Codable {
         case cold = "Cold"
@@ -243,12 +244,22 @@ struct TypeBlockComponents: Codable, Hashable {
         case dry = "Dry"
         case stagnation = "Stagnation"
         case shen = "Shen"
+
+        var friendlyName: String {
+            switch self {
+            case .damp: return "Heavy"
+            case .dry: return "Thirsty"
+            case .stagnation: return "Stuck"
+            case .shen: return "Restless"
+            }
+        }
     }
 
-    init(temperature: TemperatureChip, reserve: ReserveChip, modifier: ModifierChip? = nil) {
+    init(temperature: TemperatureChip, reserve: ReserveChip, modifier: ModifierChip? = nil, nickname: String = "") {
         self.temperature = temperature
         self.reserve = reserve
         self.modifier = modifier
+        self.nickname = nickname
     }
 
     /// Creates type block components from terrain type and modifier
@@ -291,7 +302,8 @@ struct TypeBlockComponents: Codable, Hashable {
         return TypeBlockComponents(
             temperature: temperature,
             reserve: reserve,
-            modifier: modifierChip
+            modifier: modifierChip,
+            nickname: terrainType.nickname
         )
     }
 }

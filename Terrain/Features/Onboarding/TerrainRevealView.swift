@@ -3,7 +3,7 @@
 //  Terrain
 //
 //  Terrain reveal screen - the signature moment
-//  Enhanced with mystical animations and radial pulse effect
+//  Two-phase reveal: emotional identity first, then practical guidance.
 //
 
 import SwiftUI
@@ -18,6 +18,7 @@ struct TerrainRevealView: View {
     @State private var pulseOpacity: Double = 0
     @State private var glowIntensity: Double = 0
     @State private var particleOffset: CGFloat = 0
+    @State private var showingPracticalScreen = false
 
     private var terrainCopy: TerrainCopy {
         TerrainCopy.forType(result.primaryType, modifier: result.modifier)
@@ -36,6 +37,32 @@ struct TerrainRevealView: View {
     }
 
     var body: some View {
+        ZStack {
+            theme.colors.background
+                .ignoresSafeArea()
+
+            if !showingPracticalScreen {
+                // PHASE 1: Emotional — the identity moment
+                emotionalReveal
+                    .transition(.opacity)
+            } else {
+                // PHASE 2: Practical — what this means for you
+                practicalReveal
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            }
+        }
+        .background(theme.colors.background)
+        .onAppear {
+            animateReveal()
+        }
+    }
+
+    // MARK: - Phase 1: Emotional Reveal
+
+    private var emotionalReveal: some View {
         ZStack {
             // Mystical background with radial gradient pulse
             RadialGradient(
@@ -72,77 +99,120 @@ struct TerrainRevealView: View {
             }
             .allowsHitTesting(false)
 
-            ScrollView {
-                VStack(spacing: theme.spacing.xl) {
-                    Spacer(minLength: theme.spacing.xxl)
+            VStack(spacing: theme.spacing.xxl) {
+                Spacer()
 
-                    // Header with enhanced typography animation
-                    VStack(spacing: theme.spacing.sm) {
-                        Text("Your Terrain")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textTertiary)
-                            .textCase(.uppercase)
-                            .tracking(3)
-                            .opacity(revealPhase >= 1 ? 1 : 0)
+                // "Your Terrain" label
+                Text("Your Terrain")
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textTertiary)
+                    .textCase(.uppercase)
+                    .tracking(3)
+                    .opacity(revealPhase >= 1 ? 1 : 0)
 
-                        // Primary Label - dramatic scale reveal
-                        Text(result.primaryType.label)
-                            .font(theme.typography.displayLarge)
-                            .foregroundColor(theme.colors.textPrimary)
-                            .opacity(revealPhase >= 1 ? 1 : 0)
-                            .scaleEffect(revealPhase >= 1 ? 1 : 0.7)
-                            .blur(radius: revealPhase >= 1 ? 0 : 10)
+                // Nickname — the hero moment, large and centered
+                Text(result.primaryType.nickname)
+                    .font(theme.typography.displayLarge)
+                    .foregroundColor(theme.colors.textPrimary)
+                    .opacity(revealPhase >= 1 ? 1 : 0)
+                    .scaleEffect(revealPhase >= 1 ? 1 : 0.7)
+                    .blur(radius: revealPhase >= 1 ? 0 : 10)
+                    .shadow(color: terrainGlowColor.opacity(0.5), radius: 10, x: 0, y: 0)
 
-                        // Nickname with glow effect
-                        Text(result.primaryType.nickname)
-                            .font(theme.typography.headlineLarge)
-                            .foregroundColor(theme.colors.accent)
-                            .opacity(revealPhase >= 2 ? 1 : 0)
-                            .shadow(color: terrainGlowColor.opacity(0.5), radius: 10, x: 0, y: 0)
+                // Technical label — small, beneath nickname
+                Text(result.primaryType.label)
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textTertiary)
+                    .opacity(revealPhase >= 2 ? 1 : 0)
 
-                        // Modifier chip
-                        if result.modifier != .none {
-                            TerrainChip(title: result.modifier.displayName, isSelected: true)
-                                .opacity(revealPhase >= 2 ? 1 : 0)
-                                .scaleEffect(revealPhase >= 2 ? 1 : 0.9)
-                        }
+                // Superpower — the emotional hook
+                VStack(spacing: theme.spacing.sm) {
+                    Text("Your Superpower")
+                        .font(theme.typography.labelMedium)
+                        .foregroundColor(theme.colors.textTertiary)
+                        .textCase(.uppercase)
+                        .tracking(0.5)
 
-                        // Community normalization
-                        Text(CommunityStats.normalizationText(for: result.primaryType.terrainProfileId))
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textTertiary)
-                            .opacity(revealPhase >= 2 ? 1 : 0)
+                    Text(terrainCopy.superpower)
+                        .font(theme.typography.bodyLarge)
+                        .foregroundColor(theme.colors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, theme.spacing.xl)
+                }
+                .opacity(revealPhase >= 2 ? 1 : 0)
+                .offset(y: revealPhase >= 2 ? 0 : 10)
+
+                // Community normalization
+                Text(CommunityStats.normalizationText(for: result.primaryType.terrainProfileId))
+                    .font(theme.typography.caption)
+                    .foregroundColor(theme.colors.textTertiary)
+                    .opacity(revealPhase >= 2 ? 1 : 0)
+
+                Spacer()
+
+                // Continue to Phase 2
+                TerrainPrimaryButton(title: "Continue", action: {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        showingPracticalScreen = true
                     }
-                    .animation(.spring(response: 0.6, dampingFraction: 0.7), value: revealPhase)
+                })
+                .padding(.horizontal, theme.spacing.lg)
+                .opacity(revealPhase >= 2 ? 1 : 0)
+                .animation(theme.animation.reveal.delay(0.3), value: revealPhase)
 
-                // Superpower / Trap / Ritual
+                Spacer(minLength: theme.spacing.lg)
+            }
+            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: revealPhase)
+        }
+    }
+
+    // MARK: - Phase 2: Practical Reveal
+
+    private var practicalReveal: some View {
+        ScrollView {
+            VStack(spacing: theme.spacing.xl) {
+                Spacer(minLength: theme.spacing.xl)
+
+                // Header — echoes the identity
+                VStack(spacing: theme.spacing.sm) {
+                    Text("What this means for you")
+                        .font(theme.typography.headlineLarge)
+                        .foregroundColor(theme.colors.textPrimary)
+
+                    Text(result.primaryType.nickname)
+                        .font(theme.typography.headlineSmall)
+                        .foregroundColor(theme.colors.accent)
+                }
+
+                // Modifier explanation (if present)
+                if result.modifier != .none {
+                    VStack(spacing: theme.spacing.xs) {
+                        TerrainChip(title: result.modifier.displayName, isSelected: true)
+
+                        Text(modifierExplanation)
+                            .font(theme.typography.bodySmall)
+                            .foregroundColor(theme.colors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, theme.spacing.xl)
+                    }
+                    .padding(.vertical, theme.spacing.sm)
+                }
+
+                // Trap + Ritual cards
                 VStack(spacing: theme.spacing.lg) {
-                    TerrainRevealCard(
-                        icon: "sparkles",
-                        title: "Your Superpower",
-                        content: terrainCopy.superpower
-                    )
-                    .opacity(revealPhase >= 3 ? 1 : 0)
-                    .offset(y: revealPhase >= 3 ? 0 : 20)
-
                     TerrainRevealCard(
                         icon: "exclamationmark.triangle",
                         title: "Your Trap",
                         content: terrainCopy.trap
                     )
-                    .opacity(revealPhase >= 3 ? 1 : 0)
-                    .offset(y: revealPhase >= 3 ? 0 : 20)
 
                     TerrainRevealCard(
                         icon: "sun.horizon",
                         title: "Your Signature Ritual",
                         content: terrainCopy.signatureRitual
                     )
-                    .opacity(revealPhase >= 3 ? 1 : 0)
-                    .offset(y: revealPhase >= 3 ? 0 : 20)
                 }
                 .padding(.horizontal, theme.spacing.lg)
-                .animation(theme.animation.reveal.delay(0.2), value: revealPhase)
 
                 // Truths
                 VStack(alignment: .leading, spacing: theme.spacing.md) {
@@ -150,7 +220,7 @@ struct TerrainRevealView: View {
                         .font(theme.typography.labelLarge)
                         .foregroundColor(theme.colors.textPrimary)
 
-                    ForEach(Array(terrainCopy.truths.prefix(3).enumerated()), id: \.offset) { index, truth in
+                    ForEach(Array(terrainCopy.truths.prefix(3).enumerated()), id: \.offset) { _, truth in
                         HStack(alignment: .top, spacing: theme.spacing.sm) {
                             Circle()
                                 .fill(theme.colors.accent)
@@ -164,8 +234,6 @@ struct TerrainRevealView: View {
                     }
                 }
                 .padding(.horizontal, theme.spacing.lg)
-                .opacity(revealPhase >= 4 ? 1 : 0)
-                .animation(theme.animation.reveal.delay(0.3), value: revealPhase)
 
                 // Best matches preview
                 VStack(alignment: .leading, spacing: theme.spacing.md) {
@@ -185,26 +253,36 @@ struct TerrainRevealView: View {
                     }
                 }
                 .padding(.horizontal, theme.spacing.lg)
-                .opacity(revealPhase >= 4 ? 1 : 0)
-                .animation(theme.animation.reveal.delay(0.4), value: revealPhase)
 
                 Spacer(minLength: theme.spacing.xxl)
 
-                // Continue button
+                // Continue to next onboarding step
                 TerrainPrimaryButton(title: "Continue", action: onContinue)
                     .padding(.horizontal, theme.spacing.lg)
-                    .opacity(revealPhase >= 4 ? 1 : 0)
-                    .animation(theme.animation.reveal.delay(0.5), value: revealPhase)
 
-                    Spacer(minLength: theme.spacing.lg)
-                }
+                Spacer(minLength: theme.spacing.lg)
             }
         }
-        .background(theme.colors.background)
-        .onAppear {
-            animateReveal()
+    }
+
+    // MARK: - Modifier Explanation
+
+    private var modifierExplanation: String {
+        switch result.modifier {
+        case .shen:
+            return "Your modifier adds nuance — it means your mind tends to run restless, affecting sleep and focus."
+        case .stagnation:
+            return "Your modifier adds nuance — energy tends to get stuck, causing tension and emotional build-up."
+        case .damp:
+            return "Your modifier adds nuance — your body tends to hold onto heaviness, affecting energy and clarity."
+        case .dry:
+            return "Your modifier adds nuance — your body runs dry, craving moisture for skin, throat, and comfort."
+        case .none:
+            return ""
         }
     }
+
+    // MARK: - Animation
 
     private func animateReveal() {
         // Start background glow immediately
@@ -223,29 +301,15 @@ struct TerrainRevealView: View {
             particleOffset = 30
         }
 
-        // Phase 1: Primary type reveal with dramatic scale
+        // Phase 1: Nickname reveal with dramatic scale
         withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
             revealPhase = 1
         }
 
-        // Phase 2: Nickname and modifier
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        // Phase 2: Superpower and community stats
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 revealPhase = 2
-            }
-        }
-
-        // Phase 3: Cards
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            withAnimation(theme.animation.reveal) {
-                revealPhase = 3
-            }
-        }
-
-        // Phase 4: Truths, matches, and button
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            withAnimation(theme.animation.reveal) {
-                revealPhase = 4
             }
         }
     }

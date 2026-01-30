@@ -18,6 +18,48 @@ Last updated: 2026-01-30
 - `ProgressView.swift` → YouView
 - `SettingsView.swift` → YouView
 
+## Completed (Phase 10 - 2026-01-30) - Comprehensive UX/UI Audit
+
+### Tier 1: High Impact (New User Retention)
+- [x] Phase terrain reveal into 2 screens: emotional (nickname + superpower) → practical (trap, ritual, truths, ingredients)
+- [x] Move CTA from position 9 to position 5 in HomeView (after check-in and type block)
+- [x] Rename "Start Your Capsule" → "Start Today's Practice" (CapsuleStartCTA)
+- [x] Rename "Your Daily Capsule" → "Today's Practice" (DoView)
+- [x] Replace TypeBlockView raw axis labels (cold/low/shen) with nickname ("Low Flame" / "Restless")
+- [x] Fix invalid SF Symbols: `stomach` → `fork.knife`, `brain.head.profile` → `eye` (QuickNeed)
+- [x] Fix misleading goal icons: `heart.fill` (Stress) → `wind`, `waveform.path` (Menstrual Comfort) → `drop.fill`
+- [x] Add completion screen after onboarding ("You're all set, Welcome [nickname]")
+- [x] Change quiz final button "See My Terrain" → "Reveal My Type"
+
+### Tier 2: Medium Impact (Clarity)
+- [x] Simplify Welcome screen: remove 3 feature rows, replace with single poetic subtitle
+- [x] Group quiz questions into named sections (Temperature, Energy, Body, Cravings, Mind)
+- [x] Restyle Safety screen: friendlier title, grouped checkboxes (Pregnancy, Medications, Dietary)
+- [x] Remove Daily Tone pill from DateBarView (unexplained jargon for new users)
+- [x] Auto-expand first Do/Don't "why" explanation as teaching moment
+- [x] Replace info.circle expand affordance with "Why?" text label
+- [x] Elevate coaching note: bodySmall/secondary with background card
+- [x] Convert Quick Fixes from vertical VStack to compact 2-column grid
+- [x] Remove check-in header `hand.wave` icon (text question alone is cleaner)
+- [x] Add duration inline to level selector ("Full · 10-15 min")
+
+### Tier 3: Polish & Delight
+- [x] Auto-expand first Area of Life by default (AreasOfLifeView)
+- [x] Change Do tab icon from `play.circle.fill` → `figure.mind.and.body`
+- [x] Hide Trends sub-tab for users with < 3 days of data (YouView)
+- [x] Add plain-language axis labels to Pattern Map ("Temperature tendency (cold ← → warm)", etc.)
+- [x] Add dismissible Trends intro card with legend (green=improving, orange=watch, gray=no data)
+- [x] Increase completion overlay auto-dismiss from 1.5s → 2.0s (more ceremony)
+- [x] Add modifier explanation on reveal Phase 2 ("Your modifier adds nuance...")
+- [x] Clean up unused FeatureRow struct from WelcomeView
+
+### Not Changed (Intentionally Preserved)
+- Color palette (warm off-white + brown accent) — on-brand and distinctive
+- Typography scale (black/bold hierarchy) — editorial voice works well
+- Tab count (5) — each tab has clear purpose
+- SwiftData architecture — sound, no structural changes needed
+- InsightEngine copy quality — "why for you" explanations are best feature
+
 ## Remaining Work
 
 ### Content Pack — Future Expansion

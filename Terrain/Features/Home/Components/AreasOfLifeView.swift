@@ -16,8 +16,8 @@ struct AreasOfLifeView: View {
 
     var body: some View {
         VStack(spacing: theme.spacing.xs) {
-            ForEach(areas) { area in
-                AreaOfLifeRow(area: area)
+            ForEach(Array(areas.enumerated()), id: \.element.id) { index, area in
+                AreaOfLifeRow(area: area, startExpanded: index == 0)
             }
         }
         .padding(.horizontal, theme.spacing.lg)
@@ -27,9 +27,16 @@ struct AreasOfLifeView: View {
 /// Individual expandable row for an area of life
 struct AreaOfLifeRow: View {
     let area: AreaOfLifeContent
+    var startExpanded: Bool = false
 
     @Environment(\.terrainTheme) private var theme
     @State private var isExpanded = false
+
+    init(area: AreaOfLifeContent, startExpanded: Bool = false) {
+        self.area = area
+        self.startExpanded = startExpanded
+        self._isExpanded = State(initialValue: startExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {

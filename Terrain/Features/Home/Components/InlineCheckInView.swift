@@ -27,16 +27,10 @@ struct InlineCheckInView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: theme.spacing.sm) {
-            // Header with wave icon
-            HStack(spacing: theme.spacing.xs) {
-                Image(systemName: "hand.wave")
-                    .font(theme.typography.bodyMedium)
-                    .foregroundColor(theme.colors.textPrimary)
-
-                Text("Anything affecting you today?")
-                    .font(theme.typography.bodyMedium)
-                    .foregroundColor(theme.colors.textPrimary)
-            }
+            // Header
+            Text("Anything affecting you today?")
+                .font(theme.typography.bodyMedium)
+                .foregroundColor(theme.colors.textPrimary)
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
 

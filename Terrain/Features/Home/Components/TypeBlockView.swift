@@ -2,14 +2,14 @@
 //  TypeBlockView.swift
 //  Terrain
 //
-//  Displays user's terrain type as a single-line identity stripe
+//  Displays user's terrain type as a friendly identity stripe with nickname
 //
 
 import SwiftUI
 
-/// Shows the user's terrain type as a compact single-line stripe:
-/// "Your terrain · [warm] [balanced] [shen]"
-/// Pill-shaped badges differentiate from the rectangular symptom chips in check-in.
+/// Shows the user's terrain type as a compact identity stripe:
+/// "Your terrain · Low Flame" with optional modifier like "· Restless"
+/// Uses nickname for emotional resonance rather than raw axis labels.
 struct TypeBlockView: View {
     let components: TypeBlockComponents
 
@@ -25,22 +25,16 @@ struct TypeBlockView: View {
                 .font(theme.typography.caption)
                 .foregroundColor(theme.colors.textTertiary)
 
-            // Temperature badge
+            // Nickname badge (primary identity)
             TypeChip(
-                label: components.temperature.rawValue.lowercased(),
-                color: temperatureColor
+                label: components.nickname,
+                color: nicknameColor
             )
 
-            // Reserve badge
-            TypeChip(
-                label: components.reserve.rawValue.lowercased(),
-                color: reserveColor
-            )
-
-            // Modifier badge (if present)
+            // Modifier badge (if present) — friendly name
             if let modifier = components.modifier {
                 TypeChip(
-                    label: modifier.rawValue.lowercased(),
+                    label: modifier.friendlyName,
                     color: modifierColor
                 )
             }
@@ -48,7 +42,7 @@ struct TypeBlockView: View {
         .padding(.horizontal, theme.spacing.lg)
     }
 
-    private var temperatureColor: Color {
+    private var nicknameColor: Color {
         switch components.temperature {
         case .cold:
             return theme.colors.terrainCool
@@ -56,17 +50,6 @@ struct TypeBlockView: View {
             return theme.colors.terrainNeutral
         case .warm:
             return theme.colors.terrainWarm
-        }
-    }
-
-    private var reserveColor: Color {
-        switch components.reserve {
-        case .low:
-            return theme.colors.warning
-        case .balanced:
-            return theme.colors.success
-        case .high:
-            return theme.colors.info
         }
     }
 
@@ -110,7 +93,8 @@ struct TypeChip: View {
             components: TypeBlockComponents(
                 temperature: .neutral,
                 reserve: .low,
-                modifier: .damp
+                modifier: .damp,
+                nickname: "Low Battery"
             )
         )
 
@@ -118,7 +102,8 @@ struct TypeChip: View {
             components: TypeBlockComponents(
                 temperature: .cold,
                 reserve: .balanced,
-                modifier: nil
+                modifier: nil,
+                nickname: "Cool Core"
             )
         )
 
@@ -126,7 +111,8 @@ struct TypeChip: View {
             components: TypeBlockComponents(
                 temperature: .warm,
                 reserve: .high,
-                modifier: .shen
+                modifier: .shen,
+                nickname: "Overclocked"
             )
         )
     }

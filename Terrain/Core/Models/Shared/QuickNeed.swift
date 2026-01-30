@@ -28,10 +28,10 @@ enum QuickNeed: String, CaseIterable, Identifiable {
         switch self {
         case .energy: return "bolt.fill"
         case .calm: return "leaf.fill"
-        case .digestion: return "stomach"
+        case .digestion: return "fork.knife"
         case .warmth: return "flame.fill"
         case .cooling: return "snowflake"
-        case .focus: return "brain.head.profile"
+        case .focus: return "eye"
         }
     }
 
@@ -87,7 +87,68 @@ enum QuickNeed: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Quick Need Card
+// MARK: - Compact Quick Need Card (2-column grid)
+
+struct QuickNeedCompactCard: View {
+    let need: QuickNeed
+    let isSelected: Bool
+    var isCompleted: Bool = false
+    let onTap: () -> Void
+
+    @Environment(\.terrainTheme) private var theme
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: theme.spacing.xs) {
+                Image(systemName: need.icon)
+                    .font(.system(size: 22))
+                    .foregroundColor(iconColor)
+
+                Text(need.displayName)
+                    .font(theme.typography.labelSmall)
+                    .foregroundColor(isSelected ? theme.colors.textInverted : theme.colors.textPrimary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, theme.spacing.md)
+            .background(backgroundColor)
+            .cornerRadius(theme.cornerRadius.large)
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.cornerRadius.large)
+                    .stroke(borderColor, lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private var iconColor: Color {
+        if isCompleted {
+            return theme.colors.success
+        } else if isSelected {
+            return theme.colors.textInverted
+        }
+        return theme.colors.accent
+    }
+
+    private var backgroundColor: Color {
+        if isCompleted {
+            return theme.colors.success.opacity(0.12)
+        } else if isSelected {
+            return theme.colors.accent
+        }
+        return theme.colors.surface
+    }
+
+    private var borderColor: Color {
+        if isCompleted {
+            return theme.colors.success.opacity(0.3)
+        } else if isSelected {
+            return Color.clear
+        }
+        return theme.colors.backgroundSecondary
+    }
+}
+
+// MARK: - Quick Need Card (legacy full-width)
 
 struct QuickNeedCard: View {
     let need: QuickNeed

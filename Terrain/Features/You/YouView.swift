@@ -193,12 +193,26 @@ struct YouView: View {
         }
     }
 
+    /// Whether user has enough data to show Trends tab (>= 3 days of check-ins)
+    private var hasTrendData: Bool {
+        dailyLogs.count >= 3
+    }
+
+    /// Available sub-tabs — hides Trends for new users, hides Settings (moved to gear icon)
+    private var availableSubTabs: [YouSubTab] {
+        if hasTrendData {
+            return YouSubTab.allCases
+        } else {
+            return [.terrain, .settings]
+        }
+    }
+
     // MARK: - Sub-Tab Picker
 
     private var subTabPicker: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(YouSubTab.allCases, id: \.self) { tab in
+                ForEach(availableSubTabs, id: \.self) { tab in
                     Button {
                         HapticManager.light()
                         withAnimation(theme.animation.quick) {
