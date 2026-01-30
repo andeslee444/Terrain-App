@@ -29,8 +29,8 @@ struct DoDontView: View {
                         .foregroundColor(theme.colors.textPrimary)
                 }
 
-                ForEach(Array(dos.enumerated()), id: \.element.id) { index, item in
-                    DoDontRow(item: item, isDo: true, startExpanded: index == 0 && item.whyForYou != nil)
+                ForEach(dos) { item in
+                    DoDontRow(item: item, isDo: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,9 +105,9 @@ struct DoDontRow: View {
 
                     if item.whyForYou != nil {
                         Spacer(minLength: 2)
-                        Text(isExpanded ? "▴" : "Why?")
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.accent.opacity(0.7))
+                        Image(systemName: isExpanded ? "chevron.up" : "info.circle")
+                            .font(.system(size: 10))
+                            .foregroundColor(theme.colors.textTertiary)
                     }
                 }
             }

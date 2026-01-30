@@ -39,11 +39,11 @@ enum QuickSymptom: String, CaseIterable, Codable, Identifiable {
     var icon: String {
         switch self {
         case .cold: return "thermometer.snowflake"
-        case .bloating: return "stomach"
+        case .bloating: return "wind"
         case .cramps: return "waveform.path"
         case .stressed: return "brain.head.profile"
         case .tired: return "battery.25"
-        case .headache: return "head.profile"
+        case .headache: return "exclamationmark.circle"
         case .poorSleep: return "moon.zzz"
         case .stiff: return "figure.walk"
         }
@@ -184,7 +184,7 @@ enum AreaOfLifeType: String, CaseIterable, Codable, Identifiable {
     var icon: String {
         switch self {
         case .energyFocus: return "bolt.fill"
-        case .digestion: return "stomach"
+        case .digestion: return "fork.knife"
         case .sleepWindDown: return "moon.fill"
         case .moodStress: return "heart.fill"
         }
