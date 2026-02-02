@@ -123,6 +123,8 @@ final class ContentPackService {
 
     /// Removes all content models from SwiftData so the library
     /// can be restocked with a fresh edition.
+    /// Removes all content models from SwiftData. Does NOT call save() —
+    /// the caller (importContentPack) saves both delete + insert atomically.
     private func deleteAllContent() throws {
         try modelContext.delete(model: Ingredient.self)
         try modelContext.delete(model: Routine.self)
@@ -130,7 +132,6 @@ final class ContentPackService {
         try modelContext.delete(model: Lesson.self)
         try modelContext.delete(model: Program.self)
         try modelContext.delete(model: TerrainProfile.self)
-        try modelContext.save()
     }
 }
 

@@ -27,6 +27,7 @@ Last updated: 2026-01-30
 - [x] Rename "Your Daily Capsule" → "Today's Practice" (DoView)
 - [x] Replace TypeBlockView raw axis labels (cold/low/shen) with nickname ("Low Flame" / "Restless")
 - [x] Fix invalid SF Symbols: `stomach` → `fork.knife`, `brain.head.profile` → `eye` (QuickNeed)
+- [x] Fix invalid SF Symbols: `stomach` → `wind` (QuickSymptom bloating), `head.profile` → `exclamationmark.circle` (QuickSymptom headache), `stomach` → `fork.knife` (AreaOfLifeType digestion)
 - [x] Fix misleading goal icons: `heart.fill` (Stress) → `wind`, `waveform.path` (Menstrual Comfort) → `drop.fill`
 - [x] Add completion screen after onboarding ("You're all set, Welcome [nickname]")
 - [x] Change quiz final button "See My Terrain" → "Reveal My Type"
@@ -36,8 +37,6 @@ Last updated: 2026-01-30
 - [x] Group quiz questions into named sections (Temperature, Energy, Body, Cravings, Mind)
 - [x] Restyle Safety screen: friendlier title, grouped checkboxes (Pregnancy, Medications, Dietary)
 - [x] Remove Daily Tone pill from DateBarView (unexplained jargon for new users)
-- [x] Auto-expand first Do/Don't "why" explanation as teaching moment
-- [x] Replace info.circle expand affordance with "Why?" text label
 - [x] Elevate coaching note: bodySmall/secondary with background card
 - [x] Convert Quick Fixes from vertical VStack to compact 2-column grid
 - [x] Remove check-in header `hand.wave` icon (text question alone is cleaner)
@@ -46,12 +45,16 @@ Last updated: 2026-01-30
 ### Tier 3: Polish & Delight
 - [x] Auto-expand first Area of Life by default (AreasOfLifeView)
 - [x] Change Do tab icon from `play.circle.fill` → `figure.mind.and.body`
-- [x] Hide Trends sub-tab for users with < 3 days of data (YouView)
 - [x] Add plain-language axis labels to Pattern Map ("Temperature tendency (cold ← → warm)", etc.)
 - [x] Add dismissible Trends intro card with legend (green=improving, orange=watch, gray=no data)
 - [x] Increase completion overlay auto-dismiss from 1.5s → 2.0s (more ceremony)
 - [x] Add modifier explanation on reveal Phase 2 ("Your modifier adds nuance...")
 - [x] Clean up unused FeatureRow struct from WelcomeView
+
+### Reverted After User Testing
+- Auto-expand first Do/Don't "why" explanation — reverted (all items start collapsed)
+- Replace info.circle with "Why?" text label — reverted (info.circle kept, looks cleaner)
+- Hide Trends sub-tab for <3 days of data — reverted (all 3 sub-tabs always visible)
 
 ### Not Changed (Intentionally Preserved)
 - Color palette (warm off-white + brown accent) — on-brand and distinctive
@@ -59,6 +62,24 @@ Last updated: 2026-01-30
 - Tab count (5) — each tab has clear purpose
 - SwiftData architecture — sound, no structural changes needed
 - InsightEngine copy quality — "why for you" explanations are best feature
+
+## Completed (Phase 11 - 2026-02-01) - App Store Readiness (Pre-Signing)
+
+- [x] Create `Assets.xcassets` with AppIcon placeholder (1024x1024 slot) + AccentColor (#8B7355 warm brown with dark mode variant)
+- [x] Create `PrivacyInfo.xcprivacy` declaring UserDefaults API (CA92.1), email collection (app functionality), no tracking
+- [x] Create `Terrain.entitlements` with Sign in with Apple capability
+- [x] Register all new files in `project.pbxproj` (PBXFileReference, PBXBuildFile, PBXGroup, PBXResourcesBuildPhase)
+- [x] Lock orientation to portrait-only (removed landscape from iPhone, removed iPad orientations entirely)
+- [x] Set `TARGETED_DEVICE_FAMILY = 1` (iPhone-only) for both app and test targets
+- [x] Add `CODE_SIGN_ENTITLEMENTS = Terrain.entitlements` to Debug + Release
+- [x] Add notification usage description for daily ritual reminders
+- [x] Build succeeds, all tests pass
+
+### Still Deferred (requires Apple Developer Program)
+- [ ] Add actual 1024x1024 app icon PNG
+- [ ] Set `DEVELOPMENT_TEAM` value
+- [ ] App Store Connect metadata (screenshots, description, privacy policy URL)
+- [ ] TestFlight upload
 
 ## Remaining Work
 

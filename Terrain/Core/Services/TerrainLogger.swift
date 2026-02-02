@@ -1,0 +1,10 @@
+import os.log
+
+enum TerrainLogger {
+    private static let subsystem = "com.terrain.app"
+
+    static let persistence = Logger(subsystem: subsystem, category: "persistence")
+    static let sync        = Logger(subsystem: subsystem, category: "sync")
+    static let navigation  = Logger(subsystem: subsystem, category: "navigation")
+    static let contentPack = Logger(subsystem: subsystem, category: "contentPack")
+}

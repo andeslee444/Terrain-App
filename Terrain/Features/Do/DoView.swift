@@ -16,6 +16,7 @@ struct DoView: View {
     @Environment(\.terrainTheme) private var theme
     @Environment(\.modelContext) private var modelContext
     @Environment(NavigationCoordinator.self) private var coordinator
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @Query private var userProfiles: [UserProfile]
     @Query(sort: \Ingredient.id) private var ingredients: [Ingredient]
@@ -34,9 +35,14 @@ struct DoView: View {
 
     // Avoid timer: refreshes every 60 seconds to update countdown display
     @State private var timerTick = Date()
-    private let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    private let timer = Timer.publish(every: 60, on: .main, in: .common)
+    @State private var timerCancellable: (any Cancellable)?
 
     private let suggestionEngine = SuggestionEngine()
+
+    // Cached computation results (recomputed on log changes, not every render)
+    @State private var cachedEffectivenessMap: [String: Double] = [:]
+    @State private var cachedSuggestions: [QuickNeed: QuickSuggestion] = [:]
 
     // MARK: - Computed Properties
 
@@ -97,8 +103,8 @@ struct DoView: View {
         return Set(profile.avoidTags)
     }
 
-    /// Pre-computed routine effectiveness scores from TrendEngine
-    private var routineEffectivenessMap: [String: Double] {
+    /// Recomputes routine effectiveness scores — call on appear and when logs change
+    private func recomputeEffectiveness() {
         let trendEngine = TrendEngine()
         var map: [String: Double] = [:]
         for routine in allRoutines {
@@ -106,7 +112,18 @@ struct DoView: View {
                 map[routine.id] = score
             }
         }
-        return map
+        cachedEffectivenessMap = map
+        cachedSuggestions = [:] // invalidate suggestion cache when data changes
+    }
+
+    /// Returns a cached suggestion or computes and caches a new one
+    private func cachedSuggestion(for need: QuickNeed) -> QuickSuggestion {
+        if let cached = cachedSuggestions[need] {
+            return cached
+        }
+        let result = smartSuggestion(for: need)
+        cachedSuggestions[need] = result
+        return result
     }
 
     /// Best routine for current terrain + selected level, falling back gracefully
@@ -258,6 +275,17 @@ struct DoView: View {
             .onReceive(timer) { _ in
                 // Tick the avoid-timer countdown every 60 seconds
                 timerTick = Date()
+            }
+            .onAppear {
+                timerCancellable = timer.connect()
+                recomputeEffectiveness()
+            }
+            .onDisappear {
+                timerCancellable?.cancel()
+                timerCancellable = nil
+            }
+            .onChange(of: dailyLogs.count) { _, _ in
+                recomputeEffectiveness()
             }
         }
     }
@@ -420,7 +448,7 @@ struct DoView: View {
 
             // Selected suggestion — powered by SuggestionEngine
             if let need = selectedNeed {
-                let suggestion = smartSuggestion(for: need)
+                let suggestion = cachedSuggestion(for: need)
                 QuickSuggestionCard(
                     need: need,
                     suggestion: (suggestion.title, suggestion.description, suggestion.avoidHours),
@@ -461,7 +489,9 @@ struct DoView: View {
         .background(theme.colors.surface)
         .cornerRadius(theme.cornerRadius.xl)
         .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
-        .transition(.scale.combined(with: .opacity))
+        .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
+        .accessibilityLabel("Completed\(completedNeed.map { ". You completed \($0.displayName.lowercased())" } ?? "")")
+        .accessibilityAddTraits(.isStaticText)
     }
 
     // MARK: - Suggestion Engine Integration
@@ -481,7 +511,7 @@ struct DoView: View {
             avoidTags: terrainAvoidTags,
             completedIds: todaysCompletedIds,
             cabinetIngredientIds: cabinetIngredientIds,
-            routineEffectiveness: routineEffectivenessMap
+            routineEffectiveness: cachedEffectivenessMap
         )
     }
 
@@ -494,7 +524,7 @@ struct DoView: View {
             return nil
         }
 
-        let suggestion = smartSuggestion(for: need)
+        let suggestion = cachedSuggestion(for: need)
         guard let avoidHours = suggestion.avoidHours, avoidHours > 0 else { return nil }
 
         let expiryDate = completionTime.addingTimeInterval(TimeInterval(avoidHours * 3600))
@@ -509,7 +539,7 @@ struct DoView: View {
         let hours = Int(remaining) / 3600
         let minutes = (Int(remaining) % 3600) / 60
 
-        let suggestion = smartSuggestion(for: need)
+        let suggestion = cachedSuggestion(for: need)
         let avoidNote = suggestion.avoidNotes ?? "Avoid cold drinks"
 
         if hours > 0 {
@@ -601,18 +631,18 @@ struct DoView: View {
         do {
             try modelContext.save()
             completedNeed = need
-            withAnimation(theme.animation.spring) {
+            withAnimation(reduceMotion ? nil : theme.animation.spring) {
                 showCompletionFeedback = true
             }
             HapticManager.success()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation(theme.animation.standard) {
+                withAnimation(reduceMotion ? nil : theme.animation.standard) {
                     showCompletionFeedback = false
                 }
             }
         } catch {
-            print("Failed to save completion: \(error)")
+            TerrainLogger.persistence.error("Failed to save completion: \(error)")
             HapticManager.error()
         }
     }

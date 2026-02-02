@@ -53,7 +53,7 @@ final class ConstitutionService {
         switch score {
         case ...(-7): return "Cold (strongly cold-leaning)"
         case -6...(-3): return "Cool (cold-leaning)"
-        case -2...2: return magnitudeQualifier(score, neutral: "Neutral", slight: "Neutral (slight %@)")
+        case -2...2: return magnitudeQualifier(score, neutral: "Neutral", slight: "Neutral (slight %@)", positiveDirection: "warmth", negativeDirection: "coolness")
         case 3...6: return "Warm (heat-leaning)"
         case 7...: return "Hot (strongly heat-leaning)"
         default: return "Neutral"
@@ -66,7 +66,7 @@ final class ConstitutionService {
         switch score {
         case ...(-7): return "Very Low (deeply deficient)"
         case -6...(-3): return "Low (deficient)"
-        case -2...2: return magnitudeQualifier(score, neutral: "Balanced", slight: "Balanced (slight %@)")
+        case -2...2: return magnitudeQualifier(score, neutral: "Balanced", slight: "Balanced (slight %@)", positiveDirection: "excess", negativeDirection: "deficiency")
         case 3...6: return "High (excess)"
         case 7...: return "Very High (strongly excess)"
         default: return "Balanced"
@@ -79,7 +79,7 @@ final class ConstitutionService {
         switch score {
         case ...(-7): return "Very Damp (heavy dampness)"
         case -6...(-3): return "Damp (fluid accumulation)"
-        case -2...2: return magnitudeQualifier(score, neutral: "Balanced", slight: "Balanced (slight %@)")
+        case -2...2: return magnitudeQualifier(score, neutral: "Balanced", slight: "Balanced (slight %@)", positiveDirection: "dryness", negativeDirection: "dampness")
         case 3...6: return "Dry (fluid depletion)"
         case 7...: return "Very Dry (deep dryness)"
         default: return "Balanced"
@@ -111,9 +111,16 @@ final class ConstitutionService {
     }
 
     /// Helper for bipolar axes in the neutral zone to add "slight warmth" / "slight coolness" etc.
-    private func magnitudeQualifier(_ score: Int, neutral: String, slight: String) -> String {
+    /// Each axis has its own positive/negative direction names.
+    private func magnitudeQualifier(
+        _ score: Int,
+        neutral: String,
+        slight: String,
+        positiveDirection: String,
+        negativeDirection: String
+    ) -> String {
         if score == 0 { return neutral }
-        let direction = score > 0 ? "warmth" : "coolness"
+        let direction = score > 0 ? positiveDirection : negativeDirection
         return String(format: slight, direction)
     }
 
@@ -334,7 +341,7 @@ final class ConstitutionService {
             items = [
                 WatchForItem(text: "Feeling cold even in warm rooms", icon: "thermometer.snowflake"),
                 WatchForItem(text: "Fatigue that sleep doesn't fix", icon: "battery.25"),
-                WatchForItem(text: "Loose stools or poor appetite", icon: "stomach")
+                WatchForItem(text: "Loose stools or poor appetite", icon: "fork.knife")
             ]
         case .coldBalanced:
             items = [
@@ -370,7 +377,7 @@ final class ConstitutionService {
             items = [
                 WatchForItem(text: "Snapping at people before you realize it", icon: "bolt"),
                 WatchForItem(text: "Skin breakouts or redness", icon: "flame"),
-                WatchForItem(text: "Burning indigestion after meals", icon: "stomach"),
+                WatchForItem(text: "Burning indigestion after meals", icon: "fork.knife"),
                 WatchForItem(text: "Wired energy that won't shut off", icon: "bolt.circle")
             ]
         case .warmDeficient:

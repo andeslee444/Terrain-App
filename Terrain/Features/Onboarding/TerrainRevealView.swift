@@ -13,6 +13,7 @@ struct TerrainRevealView: View {
     let onContinue: () -> Void
 
     @Environment(\.terrainTheme) private var theme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var revealPhase = 0
     @State private var pulseScale: CGFloat = 0.8
     @State private var pulseOpacity: Double = 0
@@ -76,28 +77,30 @@ struct TerrainRevealView: View {
             )
             .scaleEffect(pulseScale)
             .opacity(pulseOpacity)
-            .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: pulseScale)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: pulseScale)
 
-            // Floating particles effect
-            GeometryReader { geometry in
-                ForEach(0..<8, id: \.self) { index in
-                    Circle()
-                        .fill(terrainGlowColor.opacity(0.2))
-                        .frame(width: CGFloat.random(in: 4...8), height: CGFloat.random(in: 4...8))
-                        .position(
-                            x: geometry.size.width * CGFloat.random(in: 0.2...0.8),
-                            y: geometry.size.height * (0.2 + CGFloat(index) * 0.08) - particleOffset
-                        )
-                        .opacity(revealPhase >= 1 ? 0.6 : 0)
-                        .animation(
-                            .easeInOut(duration: Double.random(in: 3...5))
-                                .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.2),
-                            value: particleOffset
-                        )
+            // Floating particles effect (hidden when reduceMotion is on)
+            if !reduceMotion {
+                GeometryReader { geometry in
+                    ForEach(0..<8, id: \.self) { index in
+                        Circle()
+                            .fill(terrainGlowColor.opacity(0.2))
+                            .frame(width: CGFloat.random(in: 4...8), height: CGFloat.random(in: 4...8))
+                            .position(
+                                x: geometry.size.width * CGFloat.random(in: 0.2...0.8),
+                                y: geometry.size.height * (0.2 + CGFloat(index) * 0.08) - particleOffset
+                            )
+                            .opacity(revealPhase >= 1 ? 0.6 : 0)
+                            .animation(
+                                .easeInOut(duration: Double.random(in: 3...5))
+                                    .repeatForever(autoreverses: true)
+                                    .delay(Double(index) * 0.2),
+                                value: particleOffset
+                            )
+                    }
                 }
+                .allowsHitTesting(false)
             }
-            .allowsHitTesting(false)
 
             VStack(spacing: theme.spacing.xxl) {
                 Spacer()
@@ -117,7 +120,7 @@ struct TerrainRevealView: View {
                     .opacity(revealPhase >= 1 ? 1 : 0)
                     .scaleEffect(revealPhase >= 1 ? 1 : 0.7)
                     .blur(radius: revealPhase >= 1 ? 0 : 10)
-                    .shadow(color: terrainGlowColor.opacity(0.5), radius: 10, x: 0, y: 0)
+                    .shadow(color: reduceMotion ? .clear : terrainGlowColor.opacity(0.5), radius: 10, x: 0, y: 0)
 
                 // Technical label — small, beneath nickname
                 Text(result.primaryType.label)
@@ -285,6 +288,15 @@ struct TerrainRevealView: View {
     // MARK: - Animation
 
     private func animateReveal() {
+        if reduceMotion {
+            // Skip all animations — show everything at once
+            pulseOpacity = 1
+            glowIntensity = 1
+            pulseScale = 1.0
+            revealPhase = 2
+            return
+        }
+
         // Start background glow immediately
         withAnimation(.easeIn(duration: 0.8)) {
             pulseOpacity = 1

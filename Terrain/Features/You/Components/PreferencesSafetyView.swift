@@ -74,7 +74,7 @@ struct PreferencesSafetyView: View {
                 Divider().padding(.leading, theme.spacing.md)
                 safetyToggle("Breastfeeding", binding: breastfeedingBinding, icon: "heart")
                 Divider().padding(.leading, theme.spacing.md)
-                safetyToggle("GERD / Acid Reflux", binding: gerdBinding, icon: "stomach")
+                safetyToggle("GERD / Acid Reflux", binding: gerdBinding, icon: "fork.knife")
                 Divider().padding(.leading, theme.spacing.md)
                 safetyToggle("Blood Thinners", binding: bloodThinnersBinding, icon: "drop")
                 Divider().padding(.leading, theme.spacing.md)
@@ -203,6 +203,18 @@ struct PreferencesSafetyView: View {
                         }
                     }
                     .padding(theme.spacing.md)
+
+                    if let _ = syncService.lastSyncError {
+                        HStack(spacing: theme.spacing.xs) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .foregroundStyle(theme.colors.warning)
+                            Text("Sync issue — your data is saved locally")
+                                .font(theme.typography.caption)
+                                .foregroundStyle(theme.colors.textSecondary)
+                        }
+                        .padding(.horizontal, theme.spacing.md)
+                        .padding(.bottom, theme.spacing.sm)
+                    }
 
                     Divider().padding(.leading, theme.spacing.md)
 
@@ -337,18 +349,32 @@ struct PreferencesSafetyView: View {
         }
     }
 
+    @ViewBuilder
     private func aboutLink(_ title: String, icon: String, url: String) -> some View {
-        Link(destination: URL(string: url)!) {
+        if let destination = URL(string: url) {
+            Link(destination: destination) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundColor(theme.colors.textSecondary)
+                    Text(title)
+                        .font(theme.typography.bodyMedium)
+                        .foregroundColor(theme.colors.textPrimary)
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 10))
+                        .foregroundColor(theme.colors.textTertiary)
+                }
+                .padding(theme.spacing.md)
+            }
+        } else {
+            // URL is invalid — show a disabled-style row instead of crashing
             HStack {
                 Image(systemName: icon)
-                    .foregroundColor(theme.colors.textSecondary)
+                    .foregroundColor(theme.colors.textTertiary)
                 Text(title)
                     .font(theme.typography.bodyMedium)
-                    .foregroundColor(theme.colors.textPrimary)
-                Spacer()
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 10))
                     .foregroundColor(theme.colors.textTertiary)
+                Spacer()
             }
             .padding(theme.spacing.md)
         }

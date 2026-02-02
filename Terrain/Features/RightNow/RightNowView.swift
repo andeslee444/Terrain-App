@@ -167,7 +167,7 @@ struct RightNowView: View {
                 }
             }
         } catch {
-            print("Failed to save completion: \(error)")
+            TerrainLogger.persistence.error("Failed to save completion: \(error)")
             HapticManager.error()
         }
     }

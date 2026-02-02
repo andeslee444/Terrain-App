@@ -18,6 +18,7 @@ import Supabase
 /// Each record carries an `updatedAt` timestamp. When syncing, whichever
 /// copy (local or remote) has the more recent timestamp is the winner.
 /// This is the same strategy Google Docs uses for offline edits.
+@MainActor
 @Observable
 final class SupabaseSyncService {
 
@@ -54,13 +55,20 @@ final class SupabaseSyncService {
         if let plistPath = Bundle.main.path(forResource: "Supabase", ofType: "plist"),
            let dict = NSDictionary(contentsOfFile: plistPath) as? [String: Any],
            let plistURL = dict["SUPABASE_URL"] as? String,
-           let plistKey = dict["SUPABASE_ANON_KEY"] as? String {
-            url = URL(string: plistURL)!
+           let plistKey = dict["SUPABASE_ANON_KEY"] as? String,
+           let parsedURL = URL(string: plistURL) {
+            url = parsedURL
             key = plistKey
-        } else {
+        } else if let fallbackURL = URL(string: "https://xsxiykrjwzayrhwxwxbv.supabase.co") {
             // Fallback to project defaults
-            url = URL(string: "https://xsxiykrjwzayrhwxwxbv.supabase.co")!
+            url = fallbackURL
             key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzeGl5a3Jqd3pheXJod3h3eGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NTI0NzksImV4cCI6MjA4NTMyODQ3OX0.XY06FTCJBUa2YjtfV0_Zi1nYI1uHoC4fcfcnxCis5iA"
+        } else {
+            // This should never happen — the fallback URL is a compile-time constant.
+            // But if it does, we log and provide a dummy client that will fail gracefully on use.
+            TerrainLogger.sync.critical("Could not parse any Supabase URL — sync will be unavailable")
+            url = URL(string: "https://invalid.supabase.co")!
+            key = ""
         }
 
         client = SupabaseClient(supabaseURL: url, supabaseKey: key)
@@ -135,7 +143,7 @@ final class SupabaseSyncService {
             try await syncEnrollments(userId: userId, context: context)
         } catch {
             lastSyncError = error
-            print("[SupabaseSyncService] Sync error: \(error)")
+            TerrainLogger.sync.error("Sync error: \(error)")
         }
 
         isSyncing = false
@@ -144,6 +152,10 @@ final class SupabaseSyncService {
     /// Push-only sync for a quick save after a user action
     func syncUp() async {
         guard let userId = currentUserId, let context = modelContext else { return }
+        guard !isSyncing else { return }
+
+        isSyncing = true
+        defer { isSyncing = false }
 
         do {
             try await syncUserProfile(userId: userId, context: context)
@@ -152,7 +164,8 @@ final class SupabaseSyncService {
             try await syncCabinet(userId: userId, context: context)
             try await syncEnrollments(userId: userId, context: context)
         } catch {
-            print("[SupabaseSyncService] SyncUp error: \(error)")
+            lastSyncError = error
+            TerrainLogger.sync.error("SyncUp error: \(error)")
         }
     }
 
@@ -210,14 +223,14 @@ final class SupabaseSyncService {
             .from("daily_logs")
             .select()
             .eq("user_id", value: userId.uuidString)
-            .gte("date", value: ISO8601DateFormatter().string(from: cutoff))
+            .gte("date", value: SyncDateFormatters.iso8601Formatter.string(from: cutoff))
             .execute()
             .value
 
         let remoteByDate = Dictionary(grouping: remoteRows, by: { $0.date })
 
         for local in recentLogs {
-            let dateKey = Self.dateString(from: local.date)
+            let dateKey = SyncDateFormatters.dateString(from: local.date)
             if let remote = remoteByDate[dateKey]?.first {
                 if local.updatedAt > remote.updatedAt {
                     try await client
@@ -237,7 +250,7 @@ final class SupabaseSyncService {
         }
 
         // Pull logs that exist remotely but not locally
-        let localDates = Set(recentLogs.map { Self.dateString(from: $0.date) })
+        let localDates = Set(recentLogs.map { SyncDateFormatters.dateString(from: $0.date) })
         for (dateKey, rows) in remoteByDate {
             if !localDates.contains(dateKey), let remote = rows.first {
                 let newLog = remote.toModel()
@@ -294,11 +307,13 @@ final class SupabaseSyncService {
             .execute()
             .value
 
-        let remoteByIngredient = Dictionary(uniqueKeysWithValues:
-            remoteRows.map { ($0.ingredientId, $0) }
+        let remoteByIngredient = Dictionary(
+            remoteRows.map { ($0.ingredientId, $0) },
+            uniquingKeysWith: { _, latest in latest }
         )
-        let localByIngredient = Dictionary(uniqueKeysWithValues:
-            localItems.map { ($0.ingredientId, $0) }
+        let localByIngredient = Dictionary(
+            localItems.map { ($0.ingredientId, $0) },
+            uniquingKeysWith: { _, latest in latest }
         )
 
         // Push local items not in remote
@@ -340,8 +355,9 @@ final class SupabaseSyncService {
             .execute()
             .value
 
-        let remoteByProgram = Dictionary(uniqueKeysWithValues:
-            remoteRows.map { ($0.programId, $0) }
+        let remoteByProgram = Dictionary(
+            remoteRows.map { ($0.programId, $0) },
+            uniquingKeysWith: { _, latest in latest }
         )
 
         for local in localEnrollments {
@@ -375,11 +391,6 @@ final class SupabaseSyncService {
         try context.save()
     }
 
-    // MARK: - Helpers
-
-    static func dateString(from date: Date) -> String {
-        dateFormatter.string(from: date)
-    }
 }
 
 // MARK: - Row Types (Codable DTOs for Supabase)
@@ -396,6 +407,24 @@ struct UserProfileRow: Codable {
     var goals: [String]
     var quizResponses: [String: String]  // questionId → optionId
     var notificationPreferences: NotificationPrefsDTO
+    // Terrain vector axes
+    var coldHeat: Int
+    var defExcess: Int
+    var dampDry: Int
+    var qiStagnation: Int
+    var shenUnsettled: Int
+    // Quiz flags
+    var hasReflux: Bool
+    var hasLooseStool: Bool
+    var hasConstipation: Bool
+    var hasStickyStool: Bool
+    var hasNightSweats: Bool
+    var wakesThirstyHot: Bool
+    // Safety
+    var safetyPreferences: SafetyPreferencesDTO
+    // Quiz metadata
+    var quizVersion: Int
+    var lastQuizCompletedAt: String?
     var createdAt: Date
     var updatedAt: Date
 
@@ -407,6 +436,20 @@ struct UserProfileRow: Codable {
         case goals
         case quizResponses = "quiz_responses"
         case notificationPreferences = "notification_preferences"
+        case coldHeat = "cold_heat"
+        case defExcess = "def_excess"
+        case dampDry = "damp_dry"
+        case qiStagnation = "qi_stagnation"
+        case shenUnsettled = "shen_unsettled"
+        case hasReflux = "has_reflux"
+        case hasLooseStool = "has_loose_stool"
+        case hasConstipation = "has_constipation"
+        case hasStickyStool = "has_sticky_stool"
+        case hasNightSweats = "has_night_sweats"
+        case wakesThirstyHot = "wakes_thirsty_hot"
+        case safetyPreferences = "safety_preferences"
+        case quizVersion = "quiz_version"
+        case lastQuizCompletedAt = "last_quiz_completed_at"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -417,8 +460,73 @@ struct UserProfileRow: Codable {
         profile.terrainModifier = terrainModifier
         profile.goals = goals.compactMap { Goal(rawValue: $0) }
         profile.notificationsEnabled = notificationPreferences.enabled
+        // Terrain vector
+        profile.coldHeat = coldHeat
+        profile.defExcess = defExcess
+        profile.dampDry = dampDry
+        profile.qiStagnation = qiStagnation
+        profile.shenUnsettled = shenUnsettled
+        // Quiz flags
+        profile.hasReflux = hasReflux
+        profile.hasLooseStool = hasLooseStool
+        profile.hasConstipation = hasConstipation
+        profile.hasStickyStool = hasStickyStool
+        profile.hasNightSweats = hasNightSweats
+        profile.wakesThirstyHot = wakesThirstyHot
+        // Safety
+        profile.safetyPreferences = safetyPreferences.toModel()
+        // Quiz metadata
+        profile.quizVersion = quizVersion
+        if let dateString = lastQuizCompletedAt {
+            profile.lastQuizCompletedAt = SyncDateFormatters.iso8601Formatter.date(from: dateString)
+        }
         profile.updatedAt = updatedAt
     }
+
+    private static let iso8601Formatter = ISO8601DateFormatter()
+}
+
+/// Codable DTO for SafetyPreferences to/from Supabase JSON column
+struct SafetyPreferencesDTO: Codable {
+    var isPregnant: Bool = false
+    var isBreastfeeding: Bool = false
+    var hasGerd: Bool = false
+    var takesBloodThinners: Bool = false
+    var takesBpMeds: Bool = false
+    var takesThyroidMeds: Bool = false
+    var takesDiabetesMeds: Bool = false
+    var avoidsCaffeine: Bool = false
+    var hasHistamineIntolerance: Bool = false
+
+    func toModel() -> SafetyPreferences {
+        var prefs = SafetyPreferences()
+        prefs.isPregnant = isPregnant
+        prefs.isBreastfeeding = isBreastfeeding
+        prefs.hasGerd = hasGerd
+        prefs.takesBloodThinners = takesBloodThinners
+        prefs.takesBpMeds = takesBpMeds
+        prefs.takesThyroidMeds = takesThyroidMeds
+        prefs.takesDiabetesMeds = takesDiabetesMeds
+        prefs.avoidsCaffeine = avoidsCaffeine
+        prefs.hasHistamineIntolerance = hasHistamineIntolerance
+        return prefs
+    }
+
+    init(from model: SafetyPreferences) {
+        self.isPregnant = model.isPregnant
+        self.isBreastfeeding = model.isBreastfeeding
+        self.hasGerd = model.hasGerd
+        self.takesBloodThinners = model.takesBloodThinners
+        self.takesBpMeds = model.takesBpMeds
+        self.takesThyroidMeds = model.takesThyroidMeds
+        self.takesDiabetesMeds = model.takesDiabetesMeds
+        self.avoidsCaffeine = model.avoidsCaffeine
+        self.hasHistamineIntolerance = model.hasHistamineIntolerance
+    }
+
+    init() {}
+
+    // Codable conformance uses default synthesis
 }
 
 struct NotificationPrefsDTO: Codable {
@@ -432,6 +540,7 @@ struct DailyLogRow: Codable {
     let userId: UUID
     var date: String
     var symptoms: [String]
+    var symptomOnset: String?
     var energyLevel: String?
     var quickSymptoms: [String]
     var completedRoutineIds: [String]
@@ -448,6 +557,7 @@ struct DailyLogRow: Codable {
         case userId = "user_id"
         case date
         case symptoms
+        case symptomOnset = "symptom_onset"
         case energyLevel = "energy_level"
         case quickSymptoms = "quick_symptoms"
         case completedRoutineIds = "completed_routine_ids"
@@ -463,38 +573,54 @@ struct DailyLogRow: Codable {
     /// Apply remote values to a local DailyLog
     func apply(to log: DailyLog) {
         log.symptoms = symptoms.compactMap { Symptom(rawValue: $0) }
+        log.symptomOnset = symptomOnset.flatMap { SymptomOnset(rawValue: $0) }
         log.energyLevel = energyLevel.flatMap { EnergyLevel(rawValue: $0) }
         log.quickSymptoms = quickSymptoms.compactMap { QuickSymptom(rawValue: $0) }
         log.completedRoutineIds = completedRoutineIds
         log.completedMovementIds = completedMovementIds
         log.routineLevel = routineLevel.flatMap { RoutineLevel(rawValue: $0) }
         log.routineFeedback = routineFeedback.map { $0.toModel() }
+        // Parse quickFixCompletionTimes ISO8601 strings back to Dates
+        var parsedTimes: [String: Date] = [:]
+        let isoFormatter = SyncDateFormatters.iso8601Formatter
+        for (key, value) in quickFixCompletionTimes {
+            if let date = isoFormatter.date(from: value) {
+                parsedTimes[key] = date
+            }
+        }
+        log.quickFixCompletionTimes = parsedTimes
         log.notes = notes
         log.updatedAt = updatedAt
     }
 
     /// Create a new DailyLog model from this row
     func toModel() -> DailyLog {
-        let formatter = SupabaseSyncService.dateFormatter
+        let formatter = SyncDateFormatters.dateFormatter
         let logDate = formatter.date(from: date) ?? Date()
+
+        // Parse quickFixCompletionTimes
+        var parsedTimes: [String: Date] = [:]
+        let isoFormatter = SyncDateFormatters.iso8601Formatter
+        for (key, value) in quickFixCompletionTimes {
+            if let date = isoFormatter.date(from: value) {
+                parsedTimes[key] = date
+            }
+        }
 
         return DailyLog(
             date: logDate,
             symptoms: symptoms.compactMap { Symptom(rawValue: $0) },
+            symptomOnset: symptomOnset.flatMap { SymptomOnset(rawValue: $0) },
             energyLevel: energyLevel.flatMap { EnergyLevel(rawValue: $0) },
             quickSymptoms: quickSymptoms.compactMap { QuickSymptom(rawValue: $0) },
             completedRoutineIds: completedRoutineIds,
             completedMovementIds: completedMovementIds,
             routineLevel: routineLevel.flatMap { RoutineLevel(rawValue: $0) },
-            routineFeedback: routineFeedback.map { $0.toModel() }
+            routineFeedback: routineFeedback.map { $0.toModel() },
+            quickFixCompletionTimes: parsedTimes,
+            notes: notes
         )
     }
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f
-    }()
 }
 
 struct RoutineFeedbackDTO: Codable {
@@ -509,9 +635,11 @@ struct RoutineFeedbackDTO: Codable {
     }
 
     func toModel() -> RoutineFeedbackEntry {
-        RoutineFeedbackEntry(
+        let parsedTimestamp = SyncDateFormatters.iso8601Formatter.date(from: timestamp) ?? Date()
+        return RoutineFeedbackEntry(
             routineOrMovementId: routineOrMovementId,
-            feedback: PostRoutineFeedback(rawValue: feedback) ?? .notSure
+            feedback: PostRoutineFeedback(rawValue: feedback) ?? .notSure,
+            timestamp: parsedTimestamp
         )
     }
 }
@@ -522,6 +650,8 @@ struct ProgressRecordRow: Codable {
     var currentStreak: Int
     var longestStreak: Int
     var totalCompletions: Int
+    var lastCompletionDate: String?
+    var monthlyCompletions: [String: Int]
     var createdAt: Date
     var updatedAt: Date
 
@@ -531,6 +661,8 @@ struct ProgressRecordRow: Codable {
         case currentStreak = "current_streak"
         case longestStreak = "longest_streak"
         case totalCompletions = "total_completions"
+        case lastCompletionDate = "last_completion_date"
+        case monthlyCompletions = "monthly_completions"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -539,6 +671,10 @@ struct ProgressRecordRow: Codable {
         record.currentStreak = currentStreak
         record.longestStreak = longestStreak
         record.totalCompletions = totalCompletions
+        if let dateString = lastCompletionDate {
+            record.lastCompletionDate = SyncDateFormatters.dateFormatter.date(from: dateString)
+        }
+        record.monthlyCompletions = monthlyCompletions
         record.updatedAt = updatedAt
     }
 }
@@ -591,7 +727,7 @@ struct ProgramEnrollmentRow: Codable {
     }
 
     func toModel() -> ProgramEnrollment {
-        let formatter = SupabaseSyncService.dateFormatter
+        let formatter = SyncDateFormatters.dateFormatter
         let start = formatter.date(from: startDate) ?? Date()
 
         return ProgramEnrollment(
@@ -609,24 +745,36 @@ struct ProgramEnrollmentRow: Codable {
 
 extension UserProfile {
     func toRow(userId: UUID) -> UserProfileRow {
-        UserProfileRow(
+        let isoFormatter = SyncDateFormatters.iso8601Formatter
+        return UserProfileRow(
             id: id,
             userId: userId,
             terrainProfileId: terrainProfileId,
             terrainModifier: terrainModifier,
             goals: goals.map { $0.rawValue },
-            quizResponses: Dictionary(uniqueKeysWithValues:
-                (quizResponses ?? []).map { ($0.questionId, $0.optionId) }
+            quizResponses: Dictionary(
+                (quizResponses ?? []).map { ($0.questionId, $0.optionId) },
+                uniquingKeysWith: { _, latest in latest }
             ),
             notificationPreferences: NotificationPrefsDTO(
                 enabled: notificationsEnabled,
-                morningTime: morningNotificationTime.map {
-                    ISO8601DateFormatter().string(from: $0)
-                },
-                eveningTime: eveningNotificationTime.map {
-                    ISO8601DateFormatter().string(from: $0)
-                }
+                morningTime: morningNotificationTime.map { isoFormatter.string(from: $0) },
+                eveningTime: eveningNotificationTime.map { isoFormatter.string(from: $0) }
             ),
+            coldHeat: coldHeat,
+            defExcess: defExcess,
+            dampDry: dampDry,
+            qiStagnation: qiStagnation,
+            shenUnsettled: shenUnsettled,
+            hasReflux: hasReflux,
+            hasLooseStool: hasLooseStool,
+            hasConstipation: hasConstipation,
+            hasStickyStool: hasStickyStool,
+            hasNightSweats: hasNightSweats,
+            wakesThirstyHot: wakesThirstyHot,
+            safetyPreferences: SafetyPreferencesDTO(from: safetyPreferences),
+            quizVersion: quizVersion,
+            lastQuizCompletedAt: lastQuizCompletedAt.map { isoFormatter.string(from: $0) },
             createdAt: createdAt,
             updatedAt: updatedAt
         )
@@ -635,11 +783,13 @@ extension UserProfile {
 
 extension DailyLog {
     func toRow(userId: UUID) -> DailyLogRow {
-        DailyLogRow(
+        let isoFormatter = SyncDateFormatters.iso8601Formatter
+        return DailyLogRow(
             id: id,
             userId: userId,
-            date: SupabaseSyncService.dateString(from: date),
+            date: SyncDateFormatters.dateString(from: date),
             symptoms: symptoms.map { $0.rawValue },
+            symptomOnset: symptomOnset?.rawValue,
             energyLevel: energyLevel?.rawValue,
             quickSymptoms: quickSymptoms.map { $0.rawValue },
             completedRoutineIds: completedRoutineIds,
@@ -649,11 +799,12 @@ extension DailyLog {
                 RoutineFeedbackDTO(
                     routineOrMovementId: $0.routineOrMovementId,
                     feedback: $0.feedback.rawValue,
-                    timestamp: ISO8601DateFormatter().string(from: $0.timestamp)
+                    timestamp: isoFormatter.string(from: $0.timestamp)
                 )
             },
-            quickFixCompletionTimes: Dictionary(uniqueKeysWithValues:
-                quickFixCompletionTimes.map { ($0.key, ISO8601DateFormatter().string(from: $0.value)) }
+            quickFixCompletionTimes: Dictionary(
+                quickFixCompletionTimes.map { ($0.key, isoFormatter.string(from: $0.value)) },
+                uniquingKeysWith: { _, latest in latest }
             ),
             notes: notes,
             createdAt: createdAt,
@@ -670,6 +821,8 @@ extension ProgressRecord {
             currentStreak: currentStreak,
             longestStreak: longestStreak,
             totalCompletions: totalCompletions,
+            lastCompletionDate: lastCompletionDate.map { SyncDateFormatters.dateFormatter.string(from: $0) },
+            monthlyCompletions: monthlyCompletions,
             createdAt: createdAt,
             updatedAt: updatedAt
         )
@@ -682,7 +835,7 @@ extension ProgramEnrollment {
             id: id,
             userId: userId,
             programId: programId,
-            startDate: SupabaseSyncService.dateString(from: startDate),
+            startDate: SyncDateFormatters.dateString(from: startDate),
             currentDay: currentDay,
             dayCompletions: dayCompletions,
             isActive: isActive,
@@ -693,13 +846,33 @@ extension ProgramEnrollment {
     }
 }
 
-// MARK: - Date Formatter (internal access for Row types)
+// MARK: - Date Formatters (nonisolated so Row/model extensions can use them)
 
-extension SupabaseSyncService {
+/// Standalone namespace for date formatters used by sync Row types.
+/// Kept outside `SupabaseSyncService` to avoid `@MainActor` isolation,
+/// which would block non-actor-isolated `toRow()` extensions.
+enum SyncDateFormatters {
     static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
-        f.timeZone = TimeZone.current
+        f.timeZone = TimeZone(identifier: "UTC")
         return f
     }()
+
+    static let iso8601Formatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    /// Fallback for strings without fractional seconds
+    static let iso8601BasicFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    static func dateString(from date: Date) -> String {
+        dateFormatter.string(from: date)
+    }
 }

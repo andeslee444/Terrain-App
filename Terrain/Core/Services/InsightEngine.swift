@@ -382,14 +382,14 @@ final class InsightEngine {
             tips.insert("Honor your fatigue—rest is repair", at: 0)
         }
 
-        let tcmNote: String?
+        let tcmNote: String
         switch terrainType {
         case .coldDeficient, .neutralDeficient, .warmDeficient:
             tcmNote = "Qi and Yang need building. Gentle support over pushing."
         case .neutralExcess, .warmExcess:
             tcmNote = "Excess energy needs movement and release."
         default:
-            tcmNote = nil
+            tcmNote = "Steady Qi sustains focus. Protect your rhythm."
         }
 
         return AreaOfLifeContent(type: .energyFocus, tips: tips, tcmNote: tcmNote)
@@ -588,11 +588,11 @@ final class InsightEngine {
             tips.insert("Movement unsticks stuck emotions", at: 0)
         }
 
-        let tcmNote: String?
+        let tcmNote: String
         if modifier == .shen || symptoms.contains(.stressed) || symptoms.contains(.poorSleep) {
             tcmNote = "The Shen (spirit) needs anchoring. Calm the mind to calm the body."
         } else {
-            tcmNote = nil
+            tcmNote = "Emotions flow with Qi. When energy moves freely, mood follows."
         }
 
         return AreaOfLifeContent(type: .moodStress, tips: tips, tcmNote: tcmNote)

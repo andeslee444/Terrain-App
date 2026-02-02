@@ -51,7 +51,7 @@ final class TrendEngine {
         // Digestion: count bloating frequency
         results.append(computeSymptomTrend(
             category: "Digestion",
-            icon: "stomach",
+            icon: "fork.knife",
             symptom: .bloating,
             firstHalf: firstHalf,
             secondHalf: secondHalf,

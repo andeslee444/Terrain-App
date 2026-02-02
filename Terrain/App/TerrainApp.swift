@@ -17,6 +17,7 @@ struct TerrainApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var isContentLoaded = false
     @State private var loadingError: Error?
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         do {
@@ -39,9 +40,11 @@ struct TerrainApp: App {
             )
             modelContainer = try ModelContainer(
                 for: schema,
+                migrationPlan: TerrainMigrationPlan.self,
                 configurations: [modelConfiguration]
             )
         } catch {
+            TerrainLogger.persistence.critical("ModelContainer init failed: \(error.localizedDescription)")
             fatalError("Could not initialize ModelContainer: \(error)")
         }
     }
@@ -64,11 +67,13 @@ struct TerrainApp: App {
                     OnboardingCoordinatorView()
                 }
             }
+            .preferredColorScheme(.light)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .animation(.easeInOut, value: isContentLoaded)
-            .task {
-                // Configure sync service with the model context and sync on launch
-                syncService.configure(modelContext: modelContainer.mainContext)
-                await syncService.sync()
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active && syncService.isAuthenticated {
+                    Task { await syncService.sync() }
+                }
             }
         }
         .modelContainer(modelContainer)
@@ -79,13 +84,18 @@ struct TerrainApp: App {
     private func loadContentPack() {
         Task { @MainActor in
             do {
+                // Step 1: Load content FIRST so SwiftData models exist before sync touches them
                 let service = ContentPackService(modelContext: modelContainer.mainContext)
                 _ = try await service.loadBundledContentPackIfNeeded()
                 isContentLoaded = true
                 loadingError = nil
+
+                // Step 2: Now that content is loaded, configure sync and do initial pull
+                syncService.configure(modelContext: modelContainer.mainContext)
+                await syncService.sync()
             } catch {
                 loadingError = error
-                print("Failed to load content pack: \(error)")
+                TerrainLogger.contentPack.error("Failed to load content pack: \(error)")
             }
         }
     }

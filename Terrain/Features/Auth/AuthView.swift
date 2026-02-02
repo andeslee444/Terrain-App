@@ -8,6 +8,7 @@
 
 import SwiftUI
 import AuthenticationServices
+import CryptoKit
 
 struct AuthView: View {
     @Environment(\.terrainTheme) private var theme
@@ -21,6 +22,7 @@ struct AuthView: View {
     @State private var isSignUp = false
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var currentNonce: String?
 
     init(
         syncService: SupabaseSyncService,
@@ -131,6 +133,9 @@ struct AuthView: View {
                     // Apple Sign In
                     SignInWithAppleButton(.signIn) { request in
                         request.requestedScopes = [.email]
+                        let nonce = randomNonceString()
+                        currentNonce = nonce
+                        request.nonce = sha256(nonce)
                     } onCompletion: { result in
                         handleAppleSignIn(result)
                     }
@@ -178,7 +183,25 @@ struct AuthView: View {
 
     // MARK: - Actions
 
+    /// Client-side validation before hitting the network.
+    /// Returns a user-friendly error string, or nil if valid.
+    private func validateInput() -> String? {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedEmail.contains("@") || !trimmedEmail.contains(".") {
+            return "Please enter a valid email address."
+        }
+        if password.count < 6 {
+            return "Password must be at least 6 characters."
+        }
+        return nil
+    }
+
     private func handleEmailAuth() async {
+        if let validationError = validateInput() {
+            errorMessage = validationError
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -211,10 +234,10 @@ struct AuthView: View {
             isLoading = true
             Task {
                 do {
-                    // Apple Sign In with Supabase uses the ID token
+                    // Apple Sign In with Supabase uses the ID token + nonce for verification
                     try await syncService.signInWithApple(
                         idToken: idToken,
-                        nonce: "" // Supabase handles nonce internally
+                        nonce: currentNonce ?? ""
                     )
                     await syncService.sync()
                     dismiss()
@@ -230,6 +253,30 @@ struct AuthView: View {
                 errorMessage = friendlyError(error)
             }
         }
+    }
+
+    // MARK: - Nonce Helpers
+
+    /// Generates a cryptographically random 32-character string for Apple Sign In nonce.
+    private func randomNonceString(length: Int = 32) -> String {
+        precondition(length > 0)
+        var randomBytes = [UInt8](repeating: 0, count: length)
+        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+        if errorCode != errSecSuccess {
+            // Fallback: use UUID-based randomness (still unique, just less entropy)
+            return (0..<length).map { _ in
+                String(format: "%02x", UInt8.random(in: 0...255))
+            }.joined().prefix(length).description
+        }
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        return String(randomBytes.map { charset[Int($0) % charset.count] })
+    }
+
+    /// SHA256 hash of the nonce, required by Apple Sign In for verification.
+    private func sha256(_ input: String) -> String {
+        let inputData = Data(input.utf8)
+        let hashedData = SHA256.hash(data: inputData)
+        return hashedData.compactMap { String(format: "%02x", $0) }.joined()
     }
 
     /// Converts technical errors into user-friendly messages

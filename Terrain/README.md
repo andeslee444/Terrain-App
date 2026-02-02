@@ -14,11 +14,11 @@
 | **You** | Progress tracking (streaks, calendar) + settings |
 
 ### Core Features
-- **Onboarding Flow**: 8-screen flow with goals selection, 13-question quiz, and optional account creation
+- **Onboarding Flow**: 9-screen flow with goals selection, 13-question quiz (grouped into named sections), 2-phase terrain reveal, and optional account creation
 - **Terrain Scoring Engine**: Determines body constitution from 5 axes (8 types × 5 modifiers)
-- **Terrain Reveal**: High-impact reveal with community normalization ("X% share your type")
+- **Terrain Reveal**: 2-phase reveal — Phase 1: emotional (nickname + superpower + community %), Phase 2: practical (modifier, trap, ritual, truths, ingredients)
 - **InsightEngine**: Generates personalized headlines, do/don'ts, seasonal notes, and "why for you" explanations
-- **Terrain-Aware Content**: Do tab filters routines + movements by terrain type and tier (Full/Medium/Lite)
+- **Terrain-Aware Content**: Do tab ("Today's Practice") filters routines + movements by terrain type and tier (Full/Medium/Lite)
 - **Post-Routine Feedback**: Better/Same/Not sure after completing routines and movements
 - **Seasonal Awareness**: Home tab shows season-specific guidance per terrain type
 - **8 Quick Symptoms**: Check-in chips sorted by terrain relevance, all adjusting daily content
@@ -29,7 +29,7 @@
 - **Programs Enrollment**: Multi-day program persistence via ProgramEnrollment SwiftData model
 - **Supabase Sync**: Bidirectional cloud sync (5 tables, RLS, last-write-wins strategy)
 - **Authentication**: Email/password, Apple Sign In, optional during onboarding, accessible from Settings
-- **Expanded Content**: 43 ingredients, 24 routines, 9 movements, 17 lessons, 5 programs
+- **Expanded Content**: 43 ingredients, 24 routines, 9 movements, 17 lessons, 8 programs
 - **SwiftData Persistence**: Local storage for user data, symptoms, routine feedback
 - **Accessibility**: VoiceOver labels, header traits, @ScaledMetric support across views
 - **Content Validation Tests**: Schema verification, terrain coverage, content integrity checks
@@ -63,7 +63,7 @@ Terrain/
 │   ├── Engine/                   # TerrainScoringEngine (quiz scoring, 13 questions)
 │   └── Services/                 # ContentPackService, InsightEngine, ConstitutionService, TrendEngine, SupabaseSyncService, SuggestionEngine
 ├── Features/                     # Feature modules
-│   ├── Onboarding/              # Welcome, Goals, Quiz, TerrainReveal, Safety, Notifications, Account
+│   ├── Onboarding/              # Welcome, Goals, Quiz, TerrainReveal (2-phase), Safety, Notifications, Account, Complete
 │   ├── Home/                    # HomeView + Components/ (DateBar, Headline, TypeBlock, etc.)
 │   ├── Do/                      # DoView (capsule + quick fixes combined)
 │   ├── Today/                   # RoutineDetailSheet, MovementPlayerSheet, PostRoutineFeedbackSheet
@@ -177,7 +177,7 @@ The app ships with a bundled content pack at `Resources/ContentPacks/base-conten
 - **24 Routines** (8 per tier: full/medium/lite) covering all 8 terrain types
 - **9 Movements** across restorative, gentle, and moderate intensities
 - **17 Lessons** organized by topic (cold_heat, damp_dry, qi_flow, shen, safety, seasonality, methods)
-- **5 Programs** (multi-day guided sequences per terrain cluster)
+- **8 Programs** (multi-day guided sequences per terrain cluster)
 - **8 Terrain Profiles** with superpowers, traps, truths, and starter ingredients
 
 ## Testing

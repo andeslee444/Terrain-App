@@ -129,7 +129,7 @@ struct OnboardingCoordinatorView: View {
 
             VStack(spacing: 0) {
                 // Progress indicator (except for welcome and complete)
-                if coordinator.currentStep != .welcome && coordinator.currentStep != .account && coordinator.currentStep != .complete {
+                if coordinator.currentStep != .welcome && coordinator.currentStep != .quiz && coordinator.currentStep != .account && coordinator.currentStep != .complete {
                     ProgressView(value: coordinator.currentStep.progress)
                         .tint(theme.colors.accent)
                         .padding(.horizontal, theme.spacing.lg)

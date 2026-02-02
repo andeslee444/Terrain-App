@@ -201,6 +201,18 @@ struct TerrainAnimation: Sendable {
         standardDuration: 0.3,
         revealDuration: 0.5
     )
+
+    /// Returns the animation or nil if the user has reduceMotion enabled.
+    /// Use this to skip decorative animations while preserving layout transitions.
+    ///
+    /// ```swift
+    /// withAnimation(TerrainAnimation.resolved(theme.animation.spring, reduceMotion: reduceMotion)) {
+    ///     showOverlay = true
+    /// }
+    /// ```
+    static func resolved(_ animation: Animation, reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : animation
+    }
 }
 
 // MARK: - Corner Radius
@@ -226,6 +238,18 @@ struct TerrainCornerRadius: Sendable {
 /// Provides `@ScaledMetric` wrappers for hardcoded sizes that should
 /// grow with Dynamic Type. Use these in views where icon/element sizes
 /// need to scale with the user's accessibility text size preference.
+///
+/// Usage:
+/// ```swift
+/// struct MyView: View {
+///     private var metrics = TerrainScaledMetrics()
+///
+///     var body: some View {
+///         Image(systemName: "star")
+///             .font(.system(size: metrics.iconMedium))
+///     }
+/// }
+/// ```
 struct TerrainScaledMetrics {
     @ScaledMetric(relativeTo: .body) var iconSmall: CGFloat = 14
     @ScaledMetric(relativeTo: .body) var iconMedium: CGFloat = 16

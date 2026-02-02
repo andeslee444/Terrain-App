@@ -26,8 +26,15 @@ struct LocalizedString: Codable, Hashable {
         set { values[locale] = newValue }
     }
 
-    /// Returns the localized string for the current locale, falling back to en-US
+    /// Returns the localized string for the current locale, falling back to en-US.
+    /// Fast path: 100% of current content is en-US only, so skip locale parsing
+    /// when the dictionary has exactly one en-US entry.
     var localized: String {
+        // Fast path: single en-US entry (covers all current content)
+        if values.count == 1, let enUS = values["en-US"] {
+            return enUS
+        }
+
         let currentLocale = Locale.current.identifier.replacingOccurrences(of: "_", with: "-")
 
         // Try exact match first

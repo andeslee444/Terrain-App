@@ -18,7 +18,7 @@ struct SymptomHeatmapView: View {
     /// The symptom categories we track, in display order
     private let categories: [(label: String, symptom: QuickSymptom, icon: String)] = [
         ("Sleep", .poorSleep, "moon.zzz"),
-        ("Digestion", .bloating, "stomach"),
+        ("Digestion", .bloating, "fork.knife"),
         ("Stress", .stressed, "brain.head.profile"),
         ("Tired", .tired, "battery.25"),
         ("Headache", .headache, "head.profile"),

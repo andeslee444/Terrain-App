@@ -316,7 +316,7 @@ struct RoutineDetailSheet: View {
             try modelContext.save()
             HapticManager.success()
         } catch {
-            print("Failed to save cabinet item: \(error)")
+            TerrainLogger.persistence.error("Failed to save cabinet item: \(error)")
         }
     }
 
@@ -326,7 +326,7 @@ struct RoutineDetailSheet: View {
             try modelContext.save()
             HapticManager.light()
         } catch {
-            print("Failed to remove cabinet item: \(error)")
+            TerrainLogger.persistence.error("Failed to remove cabinet item: \(error)")
         }
     }
 

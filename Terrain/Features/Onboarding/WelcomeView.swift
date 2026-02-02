@@ -41,6 +41,17 @@ struct WelcomeView: View {
                 .offset(y: showContent ? 0 : 20)
                 .animation(theme.animation.reveal.delay(0.2), value: showContent)
 
+            // What you'll get
+            VStack(spacing: theme.spacing.md) {
+                featureRow(emoji: "🌿", text: "Discover your body's unique pattern")
+                featureRow(emoji: "☀️", text: "Get a personalized daily routine")
+                featureRow(emoji: "🍵", text: "Learn which ingredients suit you")
+            }
+            .padding(.horizontal, theme.spacing.xl)
+            .opacity(showContent ? 1 : 0)
+            .offset(y: showContent ? 0 : 20)
+            .animation(theme.animation.reveal.delay(0.4), value: showContent)
+
             Spacer()
 
             // Continue button
@@ -62,6 +73,16 @@ struct WelcomeView: View {
                 showContent = true
             }
         }
+    }
+    private func featureRow(emoji: String, text: String) -> some View {
+        HStack(spacing: theme.spacing.sm) {
+            Text(emoji)
+                .font(.title3)
+            Text(text)
+                .font(theme.typography.bodyMedium)
+                .foregroundColor(theme.colors.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

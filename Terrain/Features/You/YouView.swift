@@ -35,6 +35,9 @@ struct YouView: View {
     @State private var showPatternMap = false
     @State private var showReference = false
     @Namespace private var tabNamespace
+    @State private var cachedTrends: [TrendResult] = []
+    @State private var cachedRoutineScores: [(name: String, score: Double)] = []
+    @State private var cachedDailyBriefItems: [(icon: String, text: String)] = []
 
     private let constitutionService = ConstitutionService()
     private let trendEngine = TrendEngine()
@@ -94,60 +97,56 @@ struct YouView: View {
         return constitutionService.generateWatchFors(type: type, modifier: terrainModifier)
     }
 
-    // Section F: Trends
-    private var trends: [TrendResult] {
-        trendEngine.computeTrends(logs: Array(dailyLogs))
-    }
-
-    /// Routine effectiveness scores for routines the user has completed
-    private var routineScores: [(name: String, score: Double)] {
+    /// Recomputes trends, routine scores, and daily brief items.
+    /// Called on appear and when log data changes.
+    private func recomputeTrends() {
         let logs = Array(dailyLogs)
-        // Find routines that have feedback entries
-        let routineIdsWithFeedback = Set(logs.flatMap { $0.routineFeedback.map(\.routineOrMovementId) })
+        cachedTrends = trendEngine.computeTrends(logs: logs)
 
-        return routineIdsWithFeedback.compactMap { routineId in
+        let routineIdsWithFeedback = Set(logs.flatMap { $0.routineFeedback.map(\.routineOrMovementId) })
+        cachedRoutineScores = routineIdsWithFeedback.compactMap { routineId in
             guard let score = trendEngine.computeRoutineEffectiveness(logs: logs, routineId: routineId) else {
                 return nil
             }
             let name = allRoutines.first(where: { $0.id == routineId })?.displayName ?? routineId
             return (name: name, score: score)
         }
-        .sorted { abs($0.score) > abs($1.score) } // most impactful first
+        .sorted { abs($0.score) > abs($1.score) }
+
+        recomputeDailyBrief()
     }
 
-    /// Generates 1-2 Daily Brief items from defaults/watch-fors relevant to today's symptoms or recent trends
-    private var dailyBriefItems: [(icon: String, text: String)] {
+    private func recomputeDailyBrief() {
         var items: [(icon: String, text: String)] = []
 
-        // Check today's symptoms from the most recent log
-        let todaySymptoms = dailyLogs.first?.quickSymptoms ?? []
+        // Find today's log explicitly (not just .first which may not be today)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let todayLog = dailyLogs.first { calendar.startOfDay(for: $0.date) == today }
+        let todaySymptoms = todayLog?.quickSymptoms ?? []
 
-        // Pick a relevant watch-for if user has symptoms today
         if let watchFors = watchFors, !todaySymptoms.isEmpty {
-            // Find a watch-for that feels relevant to having symptoms
             if let item = watchFors.first {
                 items.append((icon: item.icon, text: item.text))
             }
         }
 
-        // Pick a relevant default (best or avoid)
         if let defaults = defaults {
             if !defaults.bestDefaults.isEmpty {
-                let tip = defaults.bestDefaults.randomElement() ?? defaults.bestDefaults[0]
+                let tip = defaults.bestDefaults[0]
                 items.append((icon: "checkmark.seal", text: tip))
             }
             if items.count < 2, !defaults.avoidDefaults.isEmpty {
-                let avoid = defaults.avoidDefaults.randomElement() ?? defaults.avoidDefaults[0]
+                let avoid = defaults.avoidDefaults[0]
                 items.append((icon: "exclamationmark.triangle", text: avoid))
             }
         }
 
-        // If we still have nothing, show a generic terrain note
         if items.isEmpty, let copy = terrainCopy {
             items.append((icon: "sparkles", text: copy.superpower))
         }
 
-        return Array(items.prefix(2))
+        cachedDailyBriefItems = Array(items.prefix(2))
     }
 
     // MARK: - Body
@@ -178,6 +177,8 @@ struct YouView: View {
             .background(theme.colors.background)
             .navigationTitle("You")
             .navigationBarTitleDisplayMode(.large)
+            .onAppear { recomputeTrends() }
+            .onChange(of: dailyLogs.count) { _, _ in recomputeTrends() }
             .confirmationDialog(
                 "Retake Quiz?",
                 isPresented: $showRetakeQuizConfirmation,
@@ -230,6 +231,8 @@ struct YouView: View {
                         .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(tab.rawValue) tab")
+                    .accessibilityAddTraits(selectedSubTab == tab ? [.isSelected] : [])
                 }
             }
 
@@ -242,7 +245,7 @@ struct YouView: View {
     @ViewBuilder
     private var terrainTabContent: some View {
         // Daily Brief — dynamic, relevant-today card
-        if !dailyBriefItems.isEmpty {
+        if !cachedDailyBriefItems.isEmpty {
             dailyBriefCard
         }
 
@@ -313,7 +316,7 @@ struct YouView: View {
             }
 
             VStack(alignment: .leading, spacing: theme.spacing.xs) {
-                ForEach(Array(dailyBriefItems.enumerated()), id: \.offset) { _, item in
+                ForEach(Array(cachedDailyBriefItems.enumerated()), id: \.offset) { _, item in
                     HStack(alignment: .top, spacing: theme.spacing.sm) {
                         Image(systemName: item.icon)
                             .foregroundColor(theme.colors.accent)
@@ -381,8 +384,8 @@ struct YouView: View {
     @ViewBuilder
     private var trendsTabContent: some View {
         EvolutionTrendsView(
-            trends: trends,
-            routineScores: routineScores,
+            trends: cachedTrends,
+            routineScores: cachedRoutineScores,
             currentStreak: progress?.currentStreak ?? 0,
             longestStreak: progress?.longestStreak ?? 0,
             totalCompletions: progress?.totalCompletions ?? 0,
@@ -401,12 +404,19 @@ struct YouView: View {
     // MARK: - Actions
 
     private func retakeQuiz() {
+        // Delete UserProfile and ProgressRecord to avoid duplicates on re-quiz.
+        // DailyLog and UserCabinet are intentionally preserved per the confirmation message.
         if let profiles = try? modelContext.fetch(FetchDescriptor<UserProfile>()) {
             for profile in profiles {
                 modelContext.delete(profile)
             }
-            try? modelContext.save()
         }
+        if let records = try? modelContext.fetch(FetchDescriptor<ProgressRecord>()) {
+            for record in records {
+                modelContext.delete(record)
+            }
+        }
+        try? modelContext.save()
         hasCompletedOnboarding = false
         HapticManager.success()
     }

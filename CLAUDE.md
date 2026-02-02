@@ -103,6 +103,9 @@ Offline-first: `base-content-pack.json` holds all content. `ContentPackService` 
 - `Ingredient`, `Routine`, `Movement`, `Lesson`, `Program`, `TerrainProfile`
 - All loaded from content pack on first launch
 
+**Shared Models** (`Core/Models/Shared/`):
+- Enums, value types, and view models: `HomeInsightModels`, `QuickNeed`, `YouViewModels`, `CommunityStats`, `TerrainCopy`, `Tags`, `SafetyFlags`, `LocalizedString`, `MediaAsset`
+
 ### Feature Modules
 
 Each feature in `Features/` is self-contained. Key modules:
@@ -111,11 +114,11 @@ Each feature in `Features/` is self-contained. Key modules:
 |---------|-----------|---------|
 | **Home** | `HomeView.swift` + `Components/` (DateBar, Headline, TypeBlock, InlineCheckIn, DoDont, AreasOfLife, ThemeToday, CapsuleStartCTA) | Insight-driven home tab |
 | **Do** | `DoView.swift` | Capsule routines + quick fixes |
-| **You** | `YouView.swift` | Progress (streaks, calendar) + settings |
-| **Onboarding** | `OnboardingCoordinatorView.swift`, `TerrainRevealView.swift` | 8-screen flow (includes account step), quiz, reveal |
+| **You** | `YouView.swift` + `Components/` (TerrainHeroHeader, TerrainIdentity, Signals, WatchFors, Defaults, EnhancedPatternMap, SymptomHeatmap, EvolutionTrends, TrendSparklineCard, RoutineEffectivenessCard, PreferencesSafety) | Progress (streaks, calendar, trends) + settings |
+| **Onboarding** | `OnboardingCoordinatorView.swift`, `TerrainRevealView.swift`, `OnboardingCompleteView.swift` | 9-screen flow: welcome → goals → safety → quiz → 2-phase reveal → notifications → account → completion |
 | **Auth** | `AuthView.swift` | Email/password + Apple Sign In, used in onboarding and settings |
 | **Programs** | `ProgramsView.swift`, `ProgramDetailSheet.swift`, `ProgramDayView.swift` | Multi-day programs with enrollment persistence |
-| **Today** | `RoutineDetailSheet.swift`, `MovementPlayerSheet.swift`, `PostRoutineFeedbackSheet.swift` | Detail sheets used by Do tab |
+| **Today** | `RoutineDetailSheet.swift`, `MovementPlayerSheet.swift`, `PostRoutineFeedbackSheet.swift`, `DailyCheckInSheet.swift` | Detail sheets used by Do tab (not a tab itself) |
 
 **Deprecated** (still in repo, content moved): `TodayView.swift` → HomeView + DoView, `RightNowView.swift` → DoView, `ProgressView.swift` → YouView, `SettingsView.swift` → YouView.
 
@@ -204,15 +207,22 @@ theme.animation.reveal   // 0.5s easeInOut
 theme.animation.spring   // .spring(response: 0.4, dampingFraction: 0.8)
 ```
 
-### Button Components (`DesignSystem/Components/TerrainButton.swift`)
+### Reusable Components (`DesignSystem/Components/`)
 ```swift
+// Buttons (TerrainButton.swift) — all use HapticManager.light()
 TerrainPrimaryButton(title: "Continue", action: { })
 TerrainSecondaryButton(title: "Back", action: { })
 TerrainTextButton(title: "Skip", action: { })
 TerrainChip(label: "Tag", isSelected: true, action: { })
 TerrainIconButton(systemName: "xmark", action: { })
+
+// Other components
+TerrainCard { ... }              // Standard card container
+TerrainTextField(...)            // Themed text input
+TerrainEmptyState(...)           // Empty state placeholder
+SkeletonLoader(...)              // Loading placeholder
+TerrainPatternBackground(...)    // Animated terrain-type background
 ```
-All buttons use `HapticManager.light()` for tactile feedback.
 
 ### Card Shadow Pattern
 ```swift
@@ -328,6 +338,22 @@ SwiftUI:
 @State private var selectedItem: Item?
 .sheet(item: $selectedItem) { item in DetailSheet(item: item) }
 ```
+
+## Config Files
+
+- `Resources/Supabase.plist` — Supabase project URL + anon key for cloud sync
+- `Resources/Assets.xcassets/` — Asset catalog (AppIcon placeholder + AccentColor #8B7355)
+- `Resources/PrivacyInfo.xcprivacy` — Apple privacy manifest (UserDefaults, email collection, no tracking)
+- `Terrain.entitlements` — App capabilities (Sign in with Apple)
+- `Package.swift` — SPM compatibility shim (primary builds use `Terrain.xcodeproj`)
+
+## App Store Build Settings
+
+- **iPhone-only**: `TARGETED_DEVICE_FAMILY = 1` (no iPad)
+- **Portrait-only**: Landscape orientations removed
+- **Entitlements**: `CODE_SIGN_ENTITLEMENTS = Terrain.entitlements`
+- **Notification description**: Daily ritual reminders
+- **Deferred**: `DEVELOPMENT_TEAM`, actual app icon, App Store Connect metadata
 
 ## Reference Documents
 

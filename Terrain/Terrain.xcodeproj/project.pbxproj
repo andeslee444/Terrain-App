@@ -12,6 +12,9 @@
 		E10000010000000000000002 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000010000000000000002 /* MainTabView.swift */; };
 		E10000010000000000000003 /* NavigationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000010000000000000003 /* NavigationCoordinator.swift */; };
 
+		/* Core/Models */
+		E10000020000000000000010 /* TerrainSchemaV1.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000020000000000000010 /* TerrainSchemaV1.swift */; };
+
 		/* Core/Models/Content */
 		E10000020000000000000001 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000020000000000000001 /* Ingredient.swift */; };
 		E10000020000000000000002 /* Lesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000020000000000000002 /* Lesson.swift */; };
@@ -120,6 +123,7 @@
 		E10000060000000000000004 /* TrendEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000004 /* TrendEngine.swift */; };
 		E10000060000000000000005 /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000005 /* SuggestionEngine.swift */; };
 		E10000060000000000000006 /* SupabaseSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000006 /* SupabaseSyncService.swift */; };
+		E10000060000000000000007 /* TerrainLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000007 /* TerrainLogger.swift */; };
 
 		/* DesignSystem/Theme */
 		E100000D0000000000000001 /* TerrainTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000D0000000000000001 /* TerrainTheme.swift */; };
@@ -143,6 +147,8 @@
 		/* Resources */
 		E100000F0000000000000001 /* base-content-pack.json in Resources */ = {isa = PBXBuildFile; fileRef = E200000F0000000000000001 /* base-content-pack.json */; };
 		E100000F0000000000000002 /* Supabase.plist in Resources */ = {isa = PBXBuildFile; fileRef = E200000F0000000000000002 /* Supabase.plist */; };
+		E100000F0000000000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E200000F0000000000000003 /* Assets.xcassets */; };
+		E100000F0000000000000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E200000F0000000000000004 /* PrivacyInfo.xcprivacy */; };
 
 		/* Tests */
 		E1000013000000000000000A /* ConstitutionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2000013000000000000000A /* ConstitutionServiceTests.swift */; };
@@ -158,6 +164,9 @@
 		E20000010000000000000001 /* TerrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainApp.swift; sourceTree = "<group>"; };
 		E20000010000000000000002 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		E20000010000000000000003 /* NavigationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationCoordinator.swift; sourceTree = "<group>"; };
+
+		/* Core/Models */
+		E20000020000000000000010 /* TerrainSchemaV1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainSchemaV1.swift; sourceTree = "<group>"; };
 
 		/* Core/Models/Content */
 		E20000020000000000000001 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
@@ -267,6 +276,7 @@
 		E20000060000000000000004 /* TrendEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendEngine.swift; sourceTree = "<group>"; };
 		E20000060000000000000005 /* SuggestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
 		E20000060000000000000006 /* SupabaseSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSyncService.swift; sourceTree = "<group>"; };
+		E20000060000000000000007 /* TerrainLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainLogger.swift; sourceTree = "<group>"; };
 
 		/* DesignSystem/Theme */
 		E200000D0000000000000001 /* TerrainTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainTheme.swift; sourceTree = "<group>"; };
@@ -290,6 +300,11 @@
 		/* Resources */
 		E200000F0000000000000001 /* base-content-pack.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "base-content-pack.json"; sourceTree = "<group>"; };
 		E200000F0000000000000002 /* Supabase.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Supabase.plist; sourceTree = "<group>"; };
+		E200000F0000000000000003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E200000F0000000000000004 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+
+		/* Entitlements */
+		E200000F0000000000000005 /* Terrain.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Terrain.entitlements; sourceTree = "<group>"; };
 
 		/* Tests */
 		E0000000000000000000000T /* TerrainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TerrainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -344,6 +359,7 @@
 				E40000040000000000000001 /* DesignSystem */,
 				E40000050000000000000001 /* Resources */,
 				E40000060000000000000001 /* Tests */,
+				E200000F0000000000000005 /* Terrain.entitlements */,
 			);
 			path = ".";
 			sourceTree = "<group>";
@@ -391,6 +407,7 @@
 		E40000020000000000000002 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				E20000020000000000000010 /* TerrainSchemaV1.swift */,
 				E40000020000000000000003 /* Content */,
 				E40000020000000000000004 /* User */,
 				E40000020000000000000007 /* Shared */,
@@ -440,6 +457,7 @@
 				E20000060000000000000004 /* TrendEngine.swift */,
 				E20000060000000000000005 /* SuggestionEngine.swift */,
 				E20000060000000000000006 /* SupabaseSyncService.swift */,
+				E20000060000000000000007 /* TerrainLogger.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -668,7 +686,9 @@
 		E40000050000000000000001 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E200000F0000000000000003 /* Assets.xcassets */,
 				E40000050000000000000002 /* ContentPacks */,
+				E200000F0000000000000004 /* PrivacyInfo.xcprivacy */,
 				E200000F0000000000000002 /* Supabase.plist */,
 			);
 			path = Resources;
@@ -778,6 +798,8 @@
 			files = (
 				E100000F0000000000000001 /* base-content-pack.json in Resources */,
 				E100000F0000000000000002 /* Supabase.plist in Resources */,
+				E100000F0000000000000003 /* Assets.xcassets in Resources */,
+				E100000F0000000000000004 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -791,6 +813,7 @@
 				E10000010000000000000001 /* TerrainApp.swift in Sources */,
 				E10000010000000000000002 /* MainTabView.swift in Sources */,
 				E10000010000000000000003 /* NavigationCoordinator.swift in Sources */,
+				E10000020000000000000010 /* TerrainSchemaV1.swift in Sources */,
 				E10000020000000000000001 /* Ingredient.swift in Sources */,
 				E10000020000000000000002 /* Lesson.swift in Sources */,
 				E10000020000000000000003 /* Movement.swift in Sources */,
@@ -867,6 +890,7 @@
 				E10000060000000000000004 /* TrendEngine.swift in Sources */,
 				E10000060000000000000005 /* SuggestionEngine.swift in Sources */,
 				E10000060000000000000006 /* SupabaseSyncService.swift in Sources */,
+				E10000060000000000000007 /* TerrainLogger.swift in Sources */,
 				E10000040000000000000009 /* QuickNeed.swift in Sources */,
 				E10000030000000000000005 /* ProgramEnrollment.swift in Sources */,
 				E1000012000000000000000C /* TrendSparklineCard.swift in Sources */,
@@ -1014,16 +1038,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Terrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1033,7 +1058,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -1042,16 +1067,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Terrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1061,7 +1087,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -1078,7 +1104,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Terrain.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Terrain";
 			};
 			name = Debug;
@@ -1096,7 +1122,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Terrain.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Terrain";
 			};
 			name = Release;

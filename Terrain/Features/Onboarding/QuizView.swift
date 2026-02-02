@@ -15,15 +15,8 @@ struct QuizView: View {
 
     var body: some View {
         VStack(spacing: theme.spacing.lg) {
-            // Progress with section context
+            // Progress indicator
             VStack(spacing: theme.spacing.xs) {
-                // Section label gives context ("Your Temperature", "Your Energy", etc.)
-                Text(sectionLabel(for: coordinator.currentQuestionIndex))
-                    .font(theme.typography.labelSmall)
-                    .foregroundColor(theme.colors.accent)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
-
                 ProgressView(value: coordinator.quizProgress)
                     .tint(theme.colors.accent)
                     .padding(.horizontal, theme.spacing.lg)
@@ -128,35 +121,6 @@ struct QuizView: View {
         }
     }
 
-    /// Maps question index to a friendly section name so 13 questions feel like 5 short sections
-    private func sectionLabel(for index: Int) -> String {
-        let totalQuestions = coordinator.filteredQuestions.count
-        // Adaptive sectioning based on total question count
-        // Base 13 questions: Temperature (0-2), Energy (3-4), Body (5-7,9), Cravings (8), Mind (10-12)
-        // With menstrual question: adds to Body section
-        if totalQuestions <= 13 {
-            switch index {
-            case 0...2: return "Your Temperature"
-            case 3...4: return "Your Energy"
-            case 5...7: return "Your Body"
-            case 8: return "Your Cravings"
-            case 9: return "Your Body"
-            case 10...12: return "Your Mind"
-            default: return "Your Body"
-            }
-        } else {
-            // 14 questions (menstrual comfort selected)
-            switch index {
-            case 0...2: return "Your Temperature"
-            case 3...4: return "Your Energy"
-            case 5...8: return "Your Body"
-            case 9: return "Your Cravings"
-            case 10: return "Your Body"
-            case 11...13: return "Your Mind"
-            default: return "Your Body"
-            }
-        }
-    }
 }
 
 #Preview {

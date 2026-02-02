@@ -168,7 +168,7 @@ struct HomeView: View {
             .background(theme.colors.background)
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
-                try? await Task.sleep(nanoseconds: 500_000_000)
+                loadSavedSymptoms()
                 HapticManager.success()
             }
             .onAppear {

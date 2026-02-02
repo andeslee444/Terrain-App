@@ -98,9 +98,13 @@ final class ProgressRecord {
         return monthlyCompletions[key] ?? 0
     }
 
+    private static let monthFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM"
+        return f
+    }()
+
     private static func monthKey(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM"
-        return formatter.string(from: date)
+        monthFormatter.string(from: date)
     }
 }

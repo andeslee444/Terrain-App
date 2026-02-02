@@ -241,7 +241,7 @@ struct SettingsView: View {
         do {
             try modelContext.save()
         } catch {
-            print("Failed to save profile: \(error)")
+            TerrainLogger.persistence.error("Failed to save profile: \(error)")
         }
     }
 

@@ -79,7 +79,7 @@ final class NavigationCoordinator {
         case "open_progress":
             navigate(to: .you)
         default:
-            print("Unknown CTA action: \(action)")
+            TerrainLogger.navigation.warning("Unknown CTA action: \(action)")
         }
     }
 }
