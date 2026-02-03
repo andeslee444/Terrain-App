@@ -496,7 +496,7 @@ struct DoView: View {
 
     // MARK: - Suggestion Engine Integration
 
-    /// Calls the SuggestionEngine with full terrain/symptom/time/season/goal context
+    /// Calls the SuggestionEngine with full terrain/symptom/time/season/goal/weather context
     private func smartSuggestion(for need: QuickNeed) -> QuickSuggestion {
         suggestionEngine.suggest(
             for: need,
@@ -511,7 +511,8 @@ struct DoView: View {
             avoidTags: terrainAvoidTags,
             completedIds: todaysCompletedIds,
             cabinetIngredientIds: cabinetIngredientIds,
-            routineEffectiveness: cachedEffectivenessMap
+            routineEffectiveness: cachedEffectivenessMap,
+            weatherCondition: todaysLog?.weatherCondition
         )
     }
 

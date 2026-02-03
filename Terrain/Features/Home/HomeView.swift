@@ -23,6 +23,9 @@ struct HomeView: View {
     @State private var selectedSymptoms: Set<QuickSymptom> = []
     @State private var hasSkippedCheckIn = false
 
+    // Weather service — fetches once per calendar day
+    @State private var weatherService = WeatherService()
+
     // Insight engine instance
     private let insightEngine = InsightEngine()
 
@@ -70,7 +73,8 @@ struct HomeView: View {
         insightEngine.generateHeadline(
             for: terrainType,
             modifier: modifier,
-            symptoms: selectedSymptoms
+            symptoms: selectedSymptoms,
+            weatherCondition: todaysLog?.weatherCondition
         )
     }
 
@@ -82,7 +86,8 @@ struct HomeView: View {
         insightEngine.generateDoDont(
             for: terrainType,
             modifier: modifier,
-            symptoms: selectedSymptoms
+            symptoms: selectedSymptoms,
+            weatherCondition: todaysLog?.weatherCondition
         )
     }
 
@@ -105,7 +110,8 @@ struct HomeView: View {
     private var seasonalNote: SeasonalNoteContent {
         insightEngine.generateSeasonalNote(
             for: terrainType,
-            modifier: modifier
+            modifier: modifier,
+            weatherCondition: todaysLog?.weatherCondition
         )
     }
 
@@ -129,7 +135,7 @@ struct HomeView: View {
                         InlineCheckInView(
                             selectedSymptoms: $selectedSymptoms,
                             onSkip: { handleSkipCheckIn() },
-                            sortedSymptoms: insightEngine.sortSymptomsByRelevance(for: terrainType, modifier: modifier)
+                            sortedSymptoms: insightEngine.sortSymptomsByRelevance(for: terrainType, modifier: modifier, weatherCondition: todaysLog?.weatherCondition)
                         )
                         .transition(.opacity.combined(with: .move(edge: .top)))
                         .accessibilityLabel("Quick symptom check-in")
@@ -173,6 +179,9 @@ struct HomeView: View {
             }
             .onAppear {
                 loadSavedSymptoms()
+            }
+            .task {
+                await weatherService.fetchWeatherIfNeeded(for: todaysLog)
             }
             .onChange(of: selectedSymptoms) { _, newValue in
                 saveSymptoms(newValue)

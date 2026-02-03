@@ -89,7 +89,8 @@ final class SuggestionEngine {
         avoidTags: Set<String> = [],
         completedIds: Set<String> = [],
         cabinetIngredientIds: Set<String> = [],
-        routineEffectiveness: [String: Double] = [:]
+        routineEffectiveness: [String: Double] = [:],
+        weatherCondition: String? = nil
     ) -> QuickSuggestion {
         var bestCandidate: QuickSuggestion?
 
@@ -146,6 +147,9 @@ final class SuggestionEngine {
             if cabinetIngredientIds.contains(ingredient.id) {
                 score += 2
             }
+
+            // Weather scoring
+            score += weatherScore(for: tags, weatherCondition: weatherCondition, modifier: modifier)
 
             // -4 Avoid-tag penalty
             if !tags.isDisjoint(with: avoidTags) {
@@ -232,6 +236,9 @@ final class SuggestionEngine {
             if routine.avoidForHours > 0 {
                 score += 1
             }
+
+            // Weather scoring
+            score += weatherScore(for: tags, weatherCondition: weatherCondition, modifier: modifier)
 
             // -4 Avoid-tag penalty
             if !tags.isDisjoint(with: avoidTags) {
@@ -420,5 +427,52 @@ final class SuggestionEngine {
         case .evening:   return ["calms_shen", "cooling"]
         case .night:     return ["calms_shen"]
         }
+    }
+
+    // MARK: - Weather Scoring
+
+    /// Scores a candidate's tags against the current weather condition.
+    /// Think of it as a relevance bonus — cold weather makes warming
+    /// ingredients/routines more attractive, hot weather favors cooling, etc.
+    ///
+    /// | Weather   | Boosted tags            | Points | Extra modifier bonus |
+    /// |-----------|-------------------------|--------|----------------------|
+    /// | cold      | warming                 | +2     | —                    |
+    /// | hot       | cooling                 | +2     | —                    |
+    /// | humid     | dries_damp              | +2     | +1 if damp modifier  |
+    /// | rainy     | dries_damp              | +2     | +1 if damp modifier  |
+    /// | dry       | moistens_dryness        | +2     | +1 if dry modifier   |
+    /// | clear     | moistens_dryness        | +2     | +1 if dry modifier   |
+    /// | windy     | calms_shen, moves_qi    | +1     | —                    |
+    private func weatherScore(
+        for tags: Set<String>,
+        weatherCondition: String?,
+        modifier: TerrainScoringEngine.Modifier
+    ) -> Int {
+        guard let weather = weatherCondition else { return 0 }
+        var score = 0
+
+        switch weather {
+        case "cold":
+            if tags.contains("warming") { score += 2 }
+        case "hot":
+            if tags.contains("cooling") { score += 2 }
+        case "humid", "rainy":
+            if tags.contains("dries_damp") {
+                score += 2
+                if modifier == .damp { score += 1 }
+            }
+        case "dry", "clear":
+            if tags.contains("moistens_dryness") {
+                score += 2
+                if modifier == .dry { score += 1 }
+            }
+        case "windy":
+            if tags.contains("calms_shen") || tags.contains("moves_qi") { score += 1 }
+        default:
+            break
+        }
+
+        return score
     }
 }

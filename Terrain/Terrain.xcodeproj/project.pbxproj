@@ -124,6 +124,7 @@
 		E10000060000000000000005 /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000005 /* SuggestionEngine.swift */; };
 		E10000060000000000000006 /* SupabaseSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000006 /* SupabaseSyncService.swift */; };
 		E10000060000000000000007 /* TerrainLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000007 /* TerrainLogger.swift */; };
+		E10000060000000000000008 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000060000000000000008 /* WeatherService.swift */; };
 
 		/* DesignSystem/Theme */
 		E100000D0000000000000001 /* TerrainTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E200000D0000000000000001 /* TerrainTheme.swift */; };
@@ -277,6 +278,7 @@
 		E20000060000000000000005 /* SuggestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
 		E20000060000000000000006 /* SupabaseSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSyncService.swift; sourceTree = "<group>"; };
 		E20000060000000000000007 /* TerrainLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainLogger.swift; sourceTree = "<group>"; };
+		E20000060000000000000008 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 
 		/* DesignSystem/Theme */
 		E200000D0000000000000001 /* TerrainTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainTheme.swift; sourceTree = "<group>"; };
@@ -458,6 +460,7 @@
 				E20000060000000000000005 /* SuggestionEngine.swift */,
 				E20000060000000000000006 /* SupabaseSyncService.swift */,
 				E20000060000000000000007 /* TerrainLogger.swift */,
+				E20000060000000000000008 /* WeatherService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -891,6 +894,7 @@
 				E10000060000000000000005 /* SuggestionEngine.swift in Sources */,
 				E10000060000000000000006 /* SupabaseSyncService.swift in Sources */,
 				E10000060000000000000007 /* TerrainLogger.swift in Sources */,
+				E10000060000000000000008 /* WeatherService.swift in Sources */,
 				E10000040000000000000009 /* QuickNeed.swift in Sources */,
 				E10000030000000000000005 /* ProgramEnrollment.swift in Sources */,
 				E1000012000000000000000C /* TrendSparklineCard.swift in Sources */,
@@ -1041,9 +1045,10 @@
 				CODE_SIGN_ENTITLEMENTS = Terrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Terrain uses your location to provide weather-aware wellness guidance personalized to your local conditions.";
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1070,9 +1075,10 @@
 				CODE_SIGN_ENTITLEMENTS = Terrain.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Terrain uses your location to provide weather-aware wellness guidance personalized to your local conditions.";
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1097,6 +1103,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
@@ -1115,6 +1122,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;

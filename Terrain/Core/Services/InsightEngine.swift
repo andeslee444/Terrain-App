@@ -16,15 +16,21 @@ final class InsightEngine {
 
     // MARK: - Headline Generation
 
-    /// Generate the main headline for the day based on terrain type and symptoms
+    /// Generate the main headline for the day based on terrain type, symptoms, and weather
     func generateHeadline(
         for terrainType: TerrainScoringEngine.PrimaryType,
         modifier: TerrainScoringEngine.Modifier = .none,
-        symptoms: Set<QuickSymptom> = []
+        symptoms: Set<QuickSymptom> = [],
+        weatherCondition: String? = nil
     ) -> HeadlineContent {
         // Check for symptom-adjusted headlines first
         if let adjustedHeadline = symptomAdjustedHeadline(for: symptoms, terrainType: terrainType) {
             return HeadlineContent(text: adjustedHeadline, isSymptomAdjusted: true)
+        }
+
+        // Check for weather-adjusted headlines (only when no symptoms override)
+        if let weatherHeadline = weatherAdjustedHeadline(for: terrainType, weatherCondition: weatherCondition) {
+            return HeadlineContent(text: weatherHeadline, isSymptomAdjusted: false)
         }
 
         // Base headline by terrain type
@@ -92,13 +98,61 @@ final class InsightEngine {
         return nil
     }
 
+    // MARK: - Weather-Adjusted Headlines
+
+    /// Generate a terrain+weather specific headline when weather data is available.
+    /// Returns nil when no weather condition is set, letting the base headline win.
+    private func weatherAdjustedHeadline(
+        for terrainType: TerrainScoringEngine.PrimaryType,
+        weatherCondition: String?
+    ) -> String? {
+        guard let weather = weatherCondition else { return nil }
+
+        switch weather {
+        case "cold":
+            switch terrainType {
+            case .coldDeficient, .coldBalanced:
+                return "Cold day, cold terrain. Layer up and warm from within."
+            case .warmExcess, .warmBalanced:
+                return "Cold outside, warm inside. Your natural heat protects you today."
+            default:
+                return "Cold day ahead. Warm drinks and warm layers are your foundation."
+            }
+        case "hot":
+            switch terrainType {
+            case .warmExcess, .warmBalanced:
+                return "Heat outside meets heat inside. Cool and slow today."
+            case .warmDeficient:
+                return "Hot day — stay hydrated and rest often. Your reserves run thin in heat."
+            case .coldDeficient, .coldBalanced:
+                return "Warm day — your cold pattern gets a natural assist. Enjoy it gently."
+            default:
+                return "Hot day. Stay light, stay hydrated, stay cool."
+            }
+        case "humid", "rainy":
+            return "Damp day. Keep your digestion light and warm."
+        case "windy":
+            return "Windy day. Ground yourself and protect your neck."
+        case "dry":
+            switch terrainType {
+            case .warmDeficient:
+                return "Dry air meets your dry pattern. Moistening foods and extra hydration today."
+            default:
+                return "Dry day. Sip warm water throughout and favor moistening foods."
+            }
+        default:
+            return nil
+        }
+    }
+
     // MARK: - Do/Don't Generation
 
     /// Generate do's and don'ts for the terrain type
     func generateDoDont(
         for terrainType: TerrainScoringEngine.PrimaryType,
         modifier: TerrainScoringEngine.Modifier = .none,
-        symptoms: Set<QuickSymptom> = []
+        symptoms: Set<QuickSymptom> = [],
+        weatherCondition: String? = nil
     ) -> (dos: [DoDontItem], donts: [DoDontItem]) {
         var dos = baseDos(for: terrainType)
         var donts = baseDonts(for: terrainType)
@@ -108,6 +162,9 @@ final class InsightEngine {
 
         // Add symptom-specific items
         addSymptomItems(symptoms: symptoms, dos: &dos, donts: &donts)
+
+        // Add weather-specific items
+        addWeatherItems(weatherCondition: weatherCondition, dos: &dos, donts: &donts)
 
         // Sort by priority and limit to top 4
         dos.sort { $0.priority < $1.priority }
@@ -292,6 +349,33 @@ final class InsightEngine {
         if symptoms.contains(.stiff) {
             dos.insert(DoDontItem(text: "Movement breaks", priority: 0, whyForYou: "Stiffness is your body asking to move. Short breaks throughout the day prevent buildup."), at: 0)
             donts.insert(DoDontItem(text: "Sitting still", priority: 0, whyForYou: "Prolonged stillness creates more stiffness. Even 2 minutes of stretching helps."), at: 0)
+        }
+    }
+
+    private func addWeatherItems(
+        weatherCondition: String?,
+        dos: inout [DoDontItem],
+        donts: inout [DoDontItem]
+    ) {
+        guard let weather = weatherCondition else { return }
+
+        switch weather {
+        case "cold":
+            dos.insert(DoDontItem(text: "Warm ginger tea", priority: 0, whyForYou: "Cold weather calls for internal warming. Ginger disperses cold and supports digestion."), at: 0)
+            donts.insert(DoDontItem(text: "Cold drinks", priority: 0, whyForYou: "Adding cold to a cold day taxes your system. Warm and room-temperature are best."), at: 0)
+        case "hot":
+            dos.insert(DoDontItem(text: "Room-temp water often", priority: 0, whyForYou: "Heat increases fluid loss. Frequent sipping prevents dehydration without shocking your digestion."), at: 0)
+            donts.insert(DoDontItem(text: "Heavy meals at midday", priority: 0, whyForYou: "Your body diverts energy to cooling in hot weather. Light meals keep you from overheating."), at: 0)
+        case "humid", "rainy":
+            dos.insert(DoDontItem(text: "Light warm meals", priority: 0, whyForYou: "External dampness adds to internal dampness. Light, warm food helps your spleen process what's accumulating."), at: 0)
+            donts.insert(DoDontItem(text: "Dairy and sweets", priority: 0, whyForYou: "Dairy and sugar generate dampness. On a humid day, they compound what the weather is already doing."), at: 0)
+        case "dry":
+            dos.insert(DoDontItem(text: "Moistening soups", priority: 0, whyForYou: "Dry air pulls moisture from your body. Soups and stews replenish what the environment takes."), at: 0)
+            donts.insert(DoDontItem(text: "Excess coffee", priority: 0, whyForYou: "Coffee is warming and drying. On a dry day, it accelerates fluid depletion."), at: 0)
+        case "windy":
+            dos.insert(DoDontItem(text: "Protect your neck", priority: 0, whyForYou: "In TCM, wind enters through the back of the neck. A scarf or collar shields this vulnerable point."), at: 0)
+        default:
+            break
         }
     }
 
@@ -707,11 +791,12 @@ final class InsightEngine {
     func generateSeasonalNote(
         for terrainType: TerrainScoringEngine.PrimaryType,
         modifier: TerrainScoringEngine.Modifier = .none,
-        date: Date = Date()
+        date: Date = Date(),
+        weatherCondition: String? = nil
     ) -> SeasonalNoteContent {
         let season = TCMSeason.current(for: date)
         let note: String
-        let tips: [String]
+        var tips: [String]
 
         switch (season, terrainType) {
         // Winter — cold types need extra care
@@ -766,12 +851,30 @@ final class InsightEngine {
             tips = ["Eat with the season", "Adjust your routines to match the weather", "Listen to what your body asks for"]
         }
 
+        // Append a weather-specific tip when weather data is available
+        if let weatherTip = weatherSeasonalTip(for: weatherCondition) {
+            tips.append(weatherTip)
+        }
+
         return SeasonalNoteContent(
             season: season.displayName,
             icon: season.icon,
             note: note,
             tips: tips
         )
+    }
+
+    /// Returns an extra seasonal tip based on today's weather condition.
+    private func weatherSeasonalTip(for weatherCondition: String?) -> String? {
+        guard let weather = weatherCondition else { return nil }
+        switch weather {
+        case "cold":  return "Today's cold weather calls for extra warming practices"
+        case "hot":   return "Today's heat means extra hydration and lighter meals"
+        case "humid", "rainy": return "Damp weather today — favor warm, light, easily-digested food"
+        case "dry":   return "Dry air today — sip warm water and add moistening ingredients"
+        case "windy": return "Wind today — protect your neck and favor grounding practices"
+        default:      return nil
+        }
     }
 
     // MARK: - Lesson Ranking (Phase 3A)
@@ -847,9 +950,12 @@ final class InsightEngine {
     // MARK: - Symptom Relevance Ordering (Phase 3B)
 
     /// Sort symptoms by relevance to terrain type, placing the most relevant ones first.
+    /// Weather context adds bonus scores — cold weather makes the "cold" symptom more
+    /// likely, humid weather bumps "bloating", etc.
     func sortSymptomsByRelevance(
         for terrainType: TerrainScoringEngine.PrimaryType,
-        modifier: TerrainScoringEngine.Modifier = .none
+        modifier: TerrainScoringEngine.Modifier = .none,
+        weatherCondition: String? = nil
     ) -> [QuickSymptom] {
         let scored = QuickSymptom.allCases.map { symptom -> (symptom: QuickSymptom, score: Int) in
             var score = 0
@@ -884,6 +990,19 @@ final class InsightEngine {
             case .stiff:
                 if modifier == .stagnation { score += 3 }
                 if case .neutralExcess = terrainType { score += 2 }
+            }
+
+            // Weather-based symptom relevance boosts
+            if let weather = weatherCondition {
+                switch (symptom, weather) {
+                case (.cold, "cold"):       score += 2
+                case (.stiff, "cold"):      score += 1
+                case (.headache, "hot"):    score += 1
+                case (.headache, "windy"):  score += 1
+                case (.bloating, "humid"):  score += 1
+                case (.bloating, "rainy"):  score += 1
+                default: break
+                }
             }
 
             return (symptom, score)
