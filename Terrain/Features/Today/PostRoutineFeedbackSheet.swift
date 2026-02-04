@@ -2,130 +2,85 @@
 //  PostRoutineFeedbackSheet.swift
 //  Terrain
 //
-//  Simple 3-button post-completion feedback sheet.
-//  Appears after a routine or movement is completed.
+//  Motivational completion sheet shown after finishing a routine or movement.
+//  Encourages consistency with a "keep going" message and explains how it helps.
 //
 
 import SwiftUI
 
-/// Post-completion feedback sheet: "How do you feel?"
-/// Three options: Better / Same / Not sure
-/// Auto-dismisses after selection with a brief "Thanks!" animation.
+/// Post-completion sheet: celebrates the user and encourages consistency.
+/// Shows routine name, a motivational message, and a terrain-specific "why it helps" note.
 struct PostRoutineFeedbackSheet: View {
-    let routineOrMovementId: String
-    let onFeedback: (PostRoutineFeedback) -> Void
+    let routineTitle: String
+    let whyItHelps: String?
+    let onDismiss: () -> Void
 
     @Environment(\.terrainTheme) private var theme
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedFeedback: PostRoutineFeedback?
-    @State private var showThanks = false
-
     var body: some View {
-        VStack(spacing: theme.spacing.xl) {
-            if showThanks {
-                // Thanks animation
-                VStack(spacing: theme.spacing.md) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 48))
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: theme.spacing.lg) {
+                    // Celebration icon
+                    Image(systemName: "leaf.fill")
+                        .font(.system(size: 44))
                         .foregroundColor(theme.colors.success)
+                        .padding(.top, theme.spacing.xl)
 
-                    Text("Thanks!")
-                        .font(theme.typography.headlineMedium)
-                        .foregroundColor(theme.colors.textPrimary)
+                    // Congrats message
+                    VStack(spacing: theme.spacing.sm) {
+                        Text("Great job!")
+                            .font(theme.typography.headlineLarge)
+                            .foregroundColor(theme.colors.textPrimary)
 
-                    Text("Your feedback helps us personalize your experience.")
-                        .font(theme.typography.bodySmall)
-                        .foregroundColor(theme.colors.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .transition(.scale.combined(with: .opacity))
-            } else {
-                // Question
-                VStack(spacing: theme.spacing.sm) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 28))
-                        .foregroundColor(theme.colors.accent)
+                        Text("Keep doing **\(routineTitle)** over the next 5 days to feel the difference.")
+                            .font(theme.typography.bodyMedium)
+                            .foregroundColor(theme.colors.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
 
-                    Text("How do you feel?")
-                        .font(theme.typography.headlineSmall)
-                        .foregroundColor(theme.colors.textPrimary)
+                    // Why it helps — terrain-specific
+                    if let why = whyItHelps, !why.isEmpty {
+                        VStack(alignment: .leading, spacing: theme.spacing.xs) {
+                            Text("Why this helps you")
+                                .font(theme.typography.labelMedium)
+                                .foregroundColor(theme.colors.accent)
 
-                    Text("After completing your practice")
-                        .font(theme.typography.bodySmall)
-                        .foregroundColor(theme.colors.textSecondary)
-                }
-
-                // Feedback buttons
-                HStack(spacing: theme.spacing.md) {
-                    ForEach(PostRoutineFeedback.allCases, id: \.self) { feedback in
-                        FeedbackOptionButton(
-                            feedback: feedback,
-                            isSelected: selectedFeedback == feedback,
-                            onTap: {
-                                selectFeedback(feedback)
-                            }
-                        )
+                            Text(why)
+                                .font(theme.typography.bodySmall)
+                                .foregroundColor(theme.colors.textSecondary)
+                                .lineSpacing(3)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(theme.spacing.md)
+                        .background(theme.colors.backgroundSecondary)
+                        .cornerRadius(theme.cornerRadius.large)
                     }
                 }
+                .padding(.horizontal, theme.spacing.xl)
             }
+
+            // Done button pinned at bottom
+            TerrainPrimaryButton(title: "Done") {
+                onDismiss()
+                dismiss()
+            }
+            .padding(theme.spacing.xl)
         }
-        .padding(theme.spacing.xl)
-        .presentationDetents([.height(280)])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-    }
-
-    private func selectFeedback(_ feedback: PostRoutineFeedback) {
-        selectedFeedback = feedback
-        HapticManager.success()
-        onFeedback(feedback)
-
-        // Show thanks briefly, then dismiss
-        withAnimation(theme.animation.spring) {
-            showThanks = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            dismiss()
-        }
-    }
-}
-
-/// Individual feedback option button
-struct FeedbackOptionButton: View {
-    let feedback: PostRoutineFeedback
-    let isSelected: Bool
-    let onTap: () -> Void
-
-    @Environment(\.terrainTheme) private var theme
-
-    var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: theme.spacing.sm) {
-                Image(systemName: feedback.icon)
-                    .font(.system(size: 28))
-                    .foregroundColor(isSelected ? theme.colors.textInverted : theme.colors.accent)
-
-                Text(feedback.displayName)
-                    .font(theme.typography.labelMedium)
-                    .foregroundColor(isSelected ? theme.colors.textInverted : theme.colors.textPrimary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, theme.spacing.md)
-            .background(isSelected ? theme.colors.accent : theme.colors.surface)
-            .cornerRadius(theme.cornerRadius.large)
-            .overlay(
-                RoundedRectangle(cornerRadius: theme.cornerRadius.large)
-                    .stroke(theme.colors.accent.opacity(0.3), lineWidth: 1)
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
     }
 }
 
 #Preview {
     PostRoutineFeedbackSheet(
-        routineOrMovementId: "warm-start-congee-full",
-        onFeedback: { feedback in print("Feedback: \(feedback)") }
+        routineTitle: "Warm Start Congee",
+        whyItHelps: "Warming your digestion in the morning helps your cold-deficient pattern hold steady energy through the day. Congee is easy to absorb, so your body spends less effort breaking it down.",
+        onDismiss: { }
     )
     .environment(\.terrainTheme, TerrainTheme.default)
 }

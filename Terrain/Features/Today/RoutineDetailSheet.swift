@@ -227,45 +227,18 @@ struct RoutineDetailSheet: View {
                 )
             }
             .sheet(isPresented: $showFeedbackSheet, onDismiss: {
-                // After feedback sheet dismisses (either via selection or swipe-down),
+                // After feedback sheet dismisses (either via button or swipe-down),
                 // fire the completion callback and close the routine sheet
                 onComplete()
                 dismiss()
             }) {
                 PostRoutineFeedbackSheet(
-                    routineOrMovementId: routineModel.id,
-                    onFeedback: { feedback in
-                        saveFeedback(feedback)
-                    }
+                    routineTitle: routineTitle,
+                    whyItHelps: whyForYourTerrain,
+                    onDismiss: { }
                 )
             }
         }
-    }
-
-    // MARK: - Feedback
-
-    private func saveFeedback(_ feedback: PostRoutineFeedback) {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-
-        let descriptor = FetchDescriptor<DailyLog>()
-        let allLogs = (try? modelContext.fetch(descriptor)) ?? []
-        let todaysLog = allLogs.first { calendar.startOfDay(for: $0.date) == today }
-
-        let entry = RoutineFeedbackEntry(
-            routineOrMovementId: routineModel.id,
-            feedback: feedback
-        )
-
-        if let log = todaysLog {
-            log.routineFeedback.append(entry)
-            log.updatedAt = Date()
-        } else {
-            let log = DailyLog(routineFeedback: [entry])
-            modelContext.insert(log)
-        }
-
-        try? modelContext.save()
     }
 
     // MARK: - Ingredient Matching

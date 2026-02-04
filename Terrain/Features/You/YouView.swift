@@ -29,8 +29,8 @@ struct YouView: View {
     @Query(sort: \DailyLog.date, order: .reverse) private var dailyLogs: [DailyLog]
     @Query(sort: \Routine.id) private var allRoutines: [Routine]
 
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
     @State private var showRetakeQuizConfirmation = false
+    @State private var showQuizEdit = false
     @State private var selectedSubTab: YouSubTab = .terrain
     @State private var showPatternMap = false
     @State private var showReference = false
@@ -180,16 +180,21 @@ struct YouView: View {
             .onAppear { recomputeTrends() }
             .onChange(of: dailyLogs.count) { _, _ in recomputeTrends() }
             .confirmationDialog(
-                "Retake Quiz?",
+                "Edit Quiz Answers?",
                 isPresented: $showRetakeQuizConfirmation,
                 titleVisibility: .visible
             ) {
-                Button("Retake Quiz", role: .destructive) {
-                    retakeQuiz()
+                Button("Review & Edit Answers") {
+                    showQuizEdit = true
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will reset your terrain profile. Your progress and logged data will be preserved.")
+                Text("Review and change your quiz answers. Your terrain will be recalculated based on your updated responses.")
+            }
+            .sheet(isPresented: $showQuizEdit) {
+                if let profile = userProfile {
+                    QuizEditView(userProfile: profile)
+                }
             }
         }
     }
@@ -401,25 +406,6 @@ struct YouView: View {
         )
     }
 
-    // MARK: - Actions
-
-    private func retakeQuiz() {
-        // Delete UserProfile and ProgressRecord to avoid duplicates on re-quiz.
-        // DailyLog and UserCabinet are intentionally preserved per the confirmation message.
-        if let profiles = try? modelContext.fetch(FetchDescriptor<UserProfile>()) {
-            for profile in profiles {
-                modelContext.delete(profile)
-            }
-        }
-        if let records = try? modelContext.fetch(FetchDescriptor<ProgressRecord>()) {
-            for record in records {
-                modelContext.delete(record)
-            }
-        }
-        try? modelContext.save()
-        hasCompletedOnboarding = false
-        HapticManager.success()
-    }
 }
 
 #Preview {

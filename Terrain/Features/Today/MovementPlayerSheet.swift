@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct MovementPlayerSheet: View {
     let level: RoutineLevel
@@ -14,8 +13,6 @@ struct MovementPlayerSheet: View {
 
     @Environment(\.terrainTheme) private var theme
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-
     @State private var currentFrame = 0
     @State private var isPlaying = false
     @State private var timeRemaining = 0
@@ -56,10 +53,6 @@ struct MovementPlayerSheet: View {
                                         insertion: .scale(scale: 0.8).combined(with: .opacity),
                                         removal: .scale(scale: 1.1).combined(with: .opacity)
                                     ))
-
-                                Text("Frame \(currentFrame + 1) of \(movement.frames.count)")
-                                    .font(theme.typography.caption)
-                                    .foregroundColor(theme.colors.textTertiary)
                             }
                             .animation(theme.animation.standard, value: currentFrame)
                         }
@@ -171,10 +164,9 @@ struct MovementPlayerSheet: View {
             dismiss()
         }) {
             PostRoutineFeedbackSheet(
-                routineOrMovementId: movement.title,
-                onFeedback: { feedback in
-                    saveFeedback(feedback)
-                }
+                routineTitle: movement.title,
+                whyItHelps: nil,
+                onDismiss: { }
             )
         }
     }
@@ -221,32 +213,6 @@ struct MovementPlayerSheet: View {
         if currentFrame > 0 {
             currentFrame -= 1
         }
-    }
-
-    // MARK: - Feedback
-
-    private func saveFeedback(_ feedback: PostRoutineFeedback) {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-
-        let descriptor = FetchDescriptor<DailyLog>()
-        let allLogs = (try? modelContext.fetch(descriptor)) ?? []
-        let todaysLog = allLogs.first { calendar.startOfDay(for: $0.date) == today }
-
-        let entry = RoutineFeedbackEntry(
-            routineOrMovementId: movement.title,
-            feedback: feedback
-        )
-
-        if let log = todaysLog {
-            log.routineFeedback.append(entry)
-            log.updatedAt = Date()
-        } else {
-            let log = DailyLog(routineFeedback: [entry])
-            modelContext.insert(log)
-        }
-
-        try? modelContext.save()
     }
 
     private func nextFrame() {

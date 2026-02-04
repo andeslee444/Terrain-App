@@ -135,18 +135,16 @@ struct IngredientDetailSheet: View {
                 TerrainChip(title: category.displayName, isSelected: true)
             }
 
-            // Tags
-            if !ingredient.tags.isEmpty {
-                FlowLayout(spacing: theme.spacing.xs) {
-                    ForEach(ingredient.tags, id: \.self) { tag in
-                        Text(formatTag(tag))
-                            .font(theme.typography.caption)
-                            .foregroundColor(theme.colors.textSecondary)
-                            .padding(.horizontal, theme.spacing.xs)
-                            .padding(.vertical, theme.spacing.xxs)
-                            .background(theme.colors.backgroundSecondary)
-                            .cornerRadius(theme.cornerRadius.small)
-                    }
+            // Benefit tags (matching the ingredient card labels)
+            FlowLayout(spacing: theme.spacing.xs) {
+                ForEach(benefitTags, id: \.self) { tag in
+                    Text(tag)
+                        .font(theme.typography.caption)
+                        .foregroundColor(theme.colors.textSecondary)
+                        .padding(.horizontal, theme.spacing.xs)
+                        .padding(.vertical, theme.spacing.xxs)
+                        .background(theme.colors.backgroundSecondary)
+                        .cornerRadius(theme.cornerRadius.small)
                 }
             }
         }
@@ -205,11 +203,13 @@ struct IngredientDetailSheet: View {
                         .foregroundColor(theme.colors.textSecondary)
                         .italic()
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(theme.spacing.sm)
                 .background(theme.colors.accent.opacity(0.06))
                 .cornerRadius(theme.cornerRadius.medium)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(theme.spacing.md)
         .background(theme.colors.surface)
         .cornerRadius(theme.cornerRadius.large)
@@ -266,6 +266,7 @@ struct IngredientDetailSheet: View {
                 .padding(.top, theme.spacing.xs)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(theme.spacing.md)
         .background(theme.colors.surface)
         .cornerRadius(theme.cornerRadius.large)
@@ -311,6 +312,7 @@ struct IngredientDetailSheet: View {
                     .foregroundColor(theme.colors.textSecondary)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(theme.spacing.md)
         .background(theme.colors.warning.opacity(0.05))
         .cornerRadius(theme.cornerRadius.large)
@@ -338,6 +340,7 @@ struct IngredientDetailSheet: View {
                 .font(theme.typography.bodySmall)
                 .foregroundColor(theme.colors.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(theme.spacing.md)
         .background(theme.colors.surface)
         .cornerRadius(theme.cornerRadius.large)
@@ -371,6 +374,13 @@ struct IngredientDetailSheet: View {
 
     // MARK: - Helpers
 
+    /// Maps raw tags/goals to user-facing benefit labels (same as ingredient cards)
+    private var benefitTags: [String] {
+        IngredientBenefit.allCases
+            .filter { $0.matches(ingredient) }
+            .map { $0.displayName }
+    }
+
     private var categoryIcon: String {
         switch IngredientCategory(rawValue: ingredient.category) {
         case .spice: return "leaf.fill"
@@ -386,9 +396,6 @@ struct IngredientDetailSheet: View {
         }
     }
 
-    private func formatTag(_ tag: String) -> String {
-        tag.replacingOccurrences(of: "_", with: " ").capitalized
-    }
 }
 
 // MARK: - Preview

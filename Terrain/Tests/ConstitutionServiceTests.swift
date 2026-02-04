@@ -200,7 +200,7 @@ final class TrendEngineTests: XCTestCase {
         XCTAssertTrue(trends.isEmpty)
     }
 
-    func testSufficientDataReturns7Trends() {
+    func testSufficientDataReturns8Trends() {
         let today = Date()
         var logs: [DailyLog] = []
         for i in 0..<7 {
@@ -211,9 +211,10 @@ final class TrendEngineTests: XCTestCase {
         }
 
         let trends = engine.computeTrends(logs: logs)
-        XCTAssertEqual(trends.count, 7)
+        XCTAssertEqual(trends.count, 8)
 
         let categories = Set(trends.map { $0.category })
+        XCTAssertTrue(categories.contains("Mood"))
         XCTAssertTrue(categories.contains("Sleep"))
         XCTAssertTrue(categories.contains("Digestion"))
         XCTAssertTrue(categories.contains("Stress"))

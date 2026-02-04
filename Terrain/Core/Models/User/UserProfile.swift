@@ -45,6 +45,13 @@ final class UserProfile {
     var quizResponses: [QuizResponse]?  // nil for pre-v2 users
     var quizVersion: Int                // 1 = legacy, 2 = with response tracking
 
+    // Display name (first name from Apple Sign In or manual entry)
+    var displayName: String?
+
+    // Lifestyle data (from quiz or settings)
+    var alcoholFrequency: String?    // "never", "rarely", "weekly", "daily"
+    var smokingStatus: String?       // "never", "former", "occasional", "regular"
+
     // Safety preferences
     var safetyPreferences: SafetyPreferences
 
@@ -76,6 +83,9 @@ final class UserProfile {
         goals: [Goal] = [],
         quizResponses: [QuizResponse]? = nil,
         quizVersion: Int = 1,
+        displayName: String? = nil,
+        alcoholFrequency: String? = nil,
+        smokingStatus: String? = nil,
         safetyPreferences: SafetyPreferences = SafetyPreferences(),
         morningNotificationTime: Date? = nil,
         eveningNotificationTime: Date? = nil,
@@ -98,6 +108,9 @@ final class UserProfile {
         self.goals = goals
         self.quizResponses = quizResponses
         self.quizVersion = quizVersion
+        self.displayName = displayName
+        self.alcoholFrequency = alcoholFrequency
+        self.smokingStatus = smokingStatus
         self.safetyPreferences = safetyPreferences
         self.morningNotificationTime = morningNotificationTime
         self.eveningNotificationTime = eveningNotificationTime

@@ -36,6 +36,14 @@ final class TrendEngine {
 
         var results: [TrendResult] = []
 
+        // Mood: overall feeling (1-10), most holistic metric so it appears first
+        results.append(computeMoodTrend(
+            firstHalf: firstHalf,
+            secondHalf: secondHalf,
+            allWindowLogs: windowLogs,
+            windowDays: windowDays
+        ))
+
         // Sleep: count poorSleep symptom frequency
         results.append(computeSymptomTrend(
             category: "Sleep",
@@ -211,6 +219,67 @@ final class TrendEngine {
         guard !logs.isEmpty else { return 0 }
         let lowCount = logs.filter { $0.energyLevel == .low }.count
         return Double(lowCount) / Double(logs.count)
+    }
+
+    /// Computes mood trend by comparing average mood rating in first half vs second half.
+    /// Higher mood in the second half = improving (NOT inverted — higher mood is better).
+    /// Uses a 1.5-point threshold on the 10-point scale (equivalent to 15%).
+    private func computeMoodTrend(
+        firstHalf: [DailyLog],
+        secondHalf: [DailyLog],
+        allWindowLogs: [DailyLog],
+        windowDays: Int
+    ) -> TrendResult {
+        let firstAvg = averageMoodRating(firstHalf)
+        let secondAvg = averageMoodRating(secondHalf)
+
+        let threshold = 1.5 // 1.5 points on a 10-point scale ≈ 15%
+        let direction: TrendDirection
+
+        if secondAvg - firstAvg > threshold {
+            direction = .improving
+        } else if firstAvg - secondAvg > threshold {
+            direction = .declining
+        } else {
+            direction = .stable
+        }
+
+        let dailyRates = computeDailyMoodRates(
+            logs: allWindowLogs,
+            windowDays: windowDays
+        )
+
+        return TrendResult(category: "Mood", direction: direction, icon: "face.smiling", dailyRates: dailyRates)
+    }
+
+    /// Average mood rating across logs that have a mood entry.
+    /// Returns 5.0 (midpoint) if no logs have mood data.
+    private func averageMoodRating(_ logs: [DailyLog]) -> Double {
+        let moodLogs = logs.compactMap { $0.moodRating }
+        guard !moodLogs.isEmpty else { return 5.0 }
+        return Double(moodLogs.reduce(0, +)) / Double(moodLogs.count)
+    }
+
+    /// Produces one rate per day for mood rating.
+    /// Maps: moodRating / 10.0 (so 1→0.1, 10→1.0). No data → 0.5 (neutral midpoint).
+    private func computeDailyMoodRates(
+        logs: [DailyLog],
+        windowDays: Int
+    ) -> [Double] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        return (0..<windowDays).map { daysAgo in
+            let targetDay = calendar.date(byAdding: .day, value: -(windowDays - 1 - daysAgo), to: today)!
+            let dayStart = calendar.startOfDay(for: targetDay)
+
+            let dayLogs = logs.filter { calendar.startOfDay(for: $0.date) == dayStart }
+            guard let log = dayLogs.first, let mood = log.moodRating else {
+                return 0.5 // no data = neutral midpoint
+            }
+
+            return Double(mood) / 10.0
+        }
     }
 
     // MARK: - Routine Effectiveness

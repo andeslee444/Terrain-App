@@ -19,6 +19,7 @@ struct IngredientsView: View {
 
     @State private var searchText = ""
     @State private var selectedCategory: IngredientCategory?
+    @State private var selectedBenefit: IngredientBenefit?
     @State private var selectedIngredient: Ingredient?
 
     // MARK: - Computed Properties
@@ -26,7 +27,7 @@ struct IngredientsView: View {
     /// Whether the user has an active search/category filter.
     /// Think of this as asking "is the user narrowing their view?"
     private var hasActiveFilter: Bool {
-        !searchText.isEmpty || selectedCategory != nil
+        !searchText.isEmpty || selectedCategory != nil || selectedBenefit != nil
     }
 
     /// Single source of truth for "does this ingredient pass the current filter?"
@@ -36,7 +37,9 @@ struct IngredientsView: View {
             ingredient.displayName.localizedCaseInsensitiveContains(searchText)
         let matchesCategory = selectedCategory == nil ||
             IngredientCategory(rawValue: ingredient.category) == selectedCategory
-        return matchesSearch && matchesCategory
+        let matchesBenefit = selectedBenefit == nil ||
+            selectedBenefit!.matches(ingredient)
+        return matchesSearch && matchesCategory && matchesBenefit
     }
 
     /// All ingredients that pass the current search + category filter
@@ -107,6 +110,9 @@ struct IngredientsView: View {
 
                     // Category filters
                     categoryFilters
+
+                    // Benefit filters
+                    benefitFilters
 
                     // My Cabinet section
                     if cabinetItems.isEmpty {
@@ -189,6 +195,25 @@ struct IngredientsView: View {
                         isSelected: selectedCategory == category,
                         action: {
                             selectedCategory = category
+                            HapticManager.selection()
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, theme.spacing.lg)
+        }
+    }
+
+    private var benefitFilters: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: theme.spacing.xs) {
+                ForEach(IngredientBenefit.allCases) { benefit in
+                    TerrainChip(
+                        title: benefit.displayName,
+                        icon: benefit.icon,
+                        isSelected: selectedBenefit == benefit,
+                        action: {
+                            selectedBenefit = selectedBenefit == benefit ? nil : benefit
                             HapticManager.selection()
                         }
                     )
@@ -432,11 +457,12 @@ struct IngredientCard: View {
 
     @Environment(\.terrainTheme) private var theme
 
-    /// Formats tags for display (converts snake_case to human-readable)
+    /// Maps the ingredient's raw tags/goals to user-facing benefit labels
     private var displayTags: [String] {
-        ingredient.tags.prefix(3).map { tag in
-            tag.replacingOccurrences(of: "_", with: " ").capitalized
-        }
+        IngredientBenefit.allCases
+            .filter { $0.matches(ingredient) }
+            .prefix(3)
+            .map { $0.displayName }
     }
 
     var body: some View {

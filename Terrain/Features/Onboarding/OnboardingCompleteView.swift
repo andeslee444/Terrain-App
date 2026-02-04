@@ -9,7 +9,8 @@
 import SwiftUI
 
 struct OnboardingCompleteView: View {
-    let nickname: String
+    let displayName: String?
+    let terrainNickname: String
     let onStart: () -> Void
 
     @Environment(\.terrainTheme) private var theme
@@ -32,9 +33,13 @@ struct OnboardingCompleteView: View {
                     .font(theme.typography.displayMedium)
                     .foregroundColor(theme.colors.textPrimary)
 
-                Text("Welcome, \(nickname)")
+                Text(displayName != nil ? "Welcome, \(displayName!)" : "Welcome to Terrain")
                     .font(theme.typography.headlineSmall)
                     .foregroundColor(theme.colors.accent)
+
+                Text("Your terrain: \(terrainNickname)")
+                    .font(theme.typography.bodyMedium)
+                    .foregroundColor(theme.colors.textSecondary)
             }
             .opacity(showContent ? 1 : 0)
             .offset(y: showContent ? 0 : 15)
@@ -68,7 +73,8 @@ struct OnboardingCompleteView: View {
 
 #Preview {
     OnboardingCompleteView(
-        nickname: "Low Flame",
+        displayName: "Andes",
+        terrainNickname: "Low Flame",
         onStart: {}
     )
     .environment(\.terrainTheme, TerrainTheme.default)

@@ -32,6 +32,12 @@ final class DailyLog {
     var weatherCondition: String?
     var temperatureCelsius: Double?
 
+    // Health data (cached from HealthKit)
+    var stepCount: Int?
+
+    // Mood rating (1-10 scale, nil = not set)
+    var moodRating: Int?
+
     // Post-routine feedback
     var routineFeedback: [RoutineFeedbackEntry]
 
@@ -56,6 +62,7 @@ final class DailyLog {
         routineLevel: RoutineLevel? = nil,
         routineFeedback: [RoutineFeedbackEntry] = [],
         quickFixCompletionTimes: [String: Date] = [:],
+        moodRating: Int? = nil,
         weatherCondition: String? = nil,
         temperatureCelsius: Double? = nil,
         notes: String? = nil
@@ -71,6 +78,7 @@ final class DailyLog {
         self.routineLevel = routineLevel
         self.routineFeedback = routineFeedback
         self.quickFixCompletionTimes = quickFixCompletionTimes
+        self.moodRating = moodRating
         self.weatherCondition = weatherCondition
         self.temperatureCelsius = temperatureCelsius
         self.notes = notes

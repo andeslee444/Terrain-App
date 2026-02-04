@@ -26,6 +26,9 @@ struct PreferencesSafetyView: View {
             // Safety flags
             safetySection
 
+            // Lifestyle
+            lifestyleSection
+
             // Notifications
             notificationsSection
 
@@ -104,6 +107,48 @@ struct PreferencesSafetyView: View {
         }
         .tint(theme.colors.accent)
         .padding(theme.spacing.md)
+    }
+
+    // MARK: - Lifestyle Section
+
+    private var lifestyleSection: some View {
+        VStack(alignment: .leading, spacing: theme.spacing.sm) {
+            Text("Lifestyle")
+                .font(theme.typography.labelLarge)
+                .foregroundColor(theme.colors.textPrimary)
+
+            VStack(spacing: 0) {
+                HStack {
+                    Image(systemName: "wineglass")
+                        .foregroundColor(theme.colors.accent)
+                    Picker("Alcohol", selection: alcoholBinding) {
+                        Text("Never").tag("never")
+                        Text("Rarely").tag("rarely")
+                        Text("Weekly").tag("weekly")
+                        Text("Daily").tag("daily")
+                    }
+                    .font(theme.typography.bodyMedium)
+                }
+                .padding(theme.spacing.md)
+
+                Divider().padding(.leading, theme.spacing.md)
+
+                HStack {
+                    Image(systemName: "smoke")
+                        .foregroundColor(theme.colors.accent)
+                    Picker("Smoking / Vaping", selection: smokingBinding) {
+                        Text("Never").tag("never")
+                        Text("Former").tag("former")
+                        Text("Occasional").tag("occasional")
+                        Text("Regular").tag("regular")
+                    }
+                    .font(theme.typography.bodyMedium)
+                }
+                .padding(theme.spacing.md)
+            }
+            .background(theme.colors.surface)
+            .cornerRadius(theme.cornerRadius.large)
+        }
     }
 
     // MARK: - Notifications Section
@@ -468,5 +513,35 @@ struct PreferencesSafetyView: View {
         components.hour = 20
         components.minute = 0
         return Calendar.current.date(from: components) ?? Date()
+    }
+
+    // MARK: - Lifestyle Bindings
+
+    private var alcoholBinding: Binding<String> {
+        Binding(
+            get: { userProfile?.alcoholFrequency ?? "never" },
+            set: { newValue in
+                if let profile = userProfile {
+                    profile.alcoholFrequency = newValue
+                    profile.updatedAt = Date()
+                    try? modelContext.save()
+                }
+                HapticManager.selection()
+            }
+        )
+    }
+
+    private var smokingBinding: Binding<String> {
+        Binding(
+            get: { userProfile?.smokingStatus ?? "never" },
+            set: { newValue in
+                if let profile = userProfile {
+                    profile.smokingStatus = newValue
+                    profile.updatedAt = Date()
+                    try? modelContext.save()
+                }
+                HapticManager.selection()
+            }
+        )
     }
 }

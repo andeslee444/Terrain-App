@@ -16,7 +16,9 @@ struct AuthView: View {
 
     let syncService: SupabaseSyncService
     let onContinueWithoutAccount: (() -> Void)?
+    var onNameReceived: ((String) -> Void)?
 
+    @State private var firstName = ""
     @State private var email = ""
     @State private var password = ""
     @State private var isSignUp = false
@@ -26,10 +28,12 @@ struct AuthView: View {
 
     init(
         syncService: SupabaseSyncService,
-        onContinueWithoutAccount: (() -> Void)? = nil
+        onContinueWithoutAccount: (() -> Void)? = nil,
+        onNameReceived: ((String) -> Void)? = nil
     ) {
         self.syncService = syncService
         self.onContinueWithoutAccount = onContinueWithoutAccount
+        self.onNameReceived = onNameReceived
     }
 
     var body: some View {
@@ -52,6 +56,17 @@ struct AuthView: View {
                     // Email/Password form
                     VStack(spacing: theme.spacing.md) {
                         VStack(spacing: theme.spacing.sm) {
+                            if isSignUp {
+                                TextField("First name (optional)", text: $firstName)
+                                    .textContentType(.givenName)
+                                    .autocapitalization(.words)
+                                    .font(theme.typography.bodyMedium)
+                                    .padding(theme.spacing.sm)
+                                    .background(theme.colors.surface)
+                                    .cornerRadius(theme.cornerRadius.medium)
+                                    .accessibilityLabel("First name, optional")
+                            }
+
                             TextField("Email", text: $email)
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
@@ -132,7 +147,7 @@ struct AuthView: View {
 
                     // Apple Sign In
                     SignInWithAppleButton(.signIn) { request in
-                        request.requestedScopes = [.email]
+                        request.requestedScopes = [.email, .fullName]
                         let nonce = randomNonceString()
                         currentNonce = nonce
                         request.nonce = sha256(nonce)
@@ -208,6 +223,10 @@ struct AuthView: View {
         do {
             if isSignUp {
                 try await syncService.signUp(email: email, password: password)
+                let trimmedName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmedName.isEmpty {
+                    onNameReceived?(trimmedName)
+                }
             } else {
                 try await syncService.signIn(email: email, password: password)
             }
@@ -231,13 +250,22 @@ struct AuthView: View {
                 return
             }
 
+            // Extract given name from Apple credential (only provided on first sign-in)
+            if let givenName = credential.fullName?.givenName, !givenName.isEmpty {
+                onNameReceived?(givenName)
+            }
+
+            guard let nonce = currentNonce, !nonce.isEmpty else {
+                errorMessage = "Security validation failed. Please try again."
+                return
+            }
+
             isLoading = true
             Task {
                 do {
-                    // Apple Sign In with Supabase uses the ID token + nonce for verification
                     try await syncService.signInWithApple(
                         idToken: idToken,
-                        nonce: currentNonce ?? ""
+                        nonce: nonce
                     )
                     await syncService.sync()
                     dismiss()
@@ -248,8 +276,15 @@ struct AuthView: View {
             }
 
         case .failure(let error):
-            // User cancelled is not an error worth showing
-            if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
+            let errorCode = ASAuthorizationError.Code(rawValue: (error as NSError).code)
+            switch errorCode {
+            case .canceled:
+                break // User tapped Cancel — not an error
+            case .notHandled, .invalidResponse:
+                errorMessage = "Apple Sign In is temporarily unavailable. Please try again."
+            case .notInteractive:
+                errorMessage = "Apple Sign In could not be shown. Please try again."
+            default:
                 errorMessage = friendlyError(error)
             }
         }

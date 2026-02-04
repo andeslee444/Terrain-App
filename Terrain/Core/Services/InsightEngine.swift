@@ -21,11 +21,21 @@ final class InsightEngine {
         for terrainType: TerrainScoringEngine.PrimaryType,
         modifier: TerrainScoringEngine.Modifier = .none,
         symptoms: Set<QuickSymptom> = [],
-        weatherCondition: String? = nil
+        weatherCondition: String? = nil,
+        stepCount: Int? = nil
     ) -> HeadlineContent {
         // Check for symptom-adjusted headlines first
         if let adjustedHeadline = symptomAdjustedHeadline(for: symptoms, terrainType: terrainType) {
             return HeadlineContent(text: adjustedHeadline, isSymptomAdjusted: true)
+        }
+
+        // Check for step-count-adjusted headlines (when no symptoms override)
+        if let steps = stepCount {
+            if steps < 2000 {
+                return HeadlineContent(text: "Sedentary day so far. Even a gentle walk shifts everything.", isSymptomAdjusted: false)
+            } else if steps > 10000 {
+                return HeadlineContent(text: "Active day. Nourish and restore what you've spent.", isSymptomAdjusted: false)
+            }
         }
 
         // Check for weather-adjusted headlines (only when no symptoms override)
@@ -152,7 +162,10 @@ final class InsightEngine {
         for terrainType: TerrainScoringEngine.PrimaryType,
         modifier: TerrainScoringEngine.Modifier = .none,
         symptoms: Set<QuickSymptom> = [],
-        weatherCondition: String? = nil
+        weatherCondition: String? = nil,
+        alcoholFrequency: String? = nil,
+        smokingStatus: String? = nil,
+        stepCount: Int? = nil
     ) -> (dos: [DoDontItem], donts: [DoDontItem]) {
         var dos = baseDos(for: terrainType)
         var donts = baseDonts(for: terrainType)
@@ -165,6 +178,24 @@ final class InsightEngine {
 
         // Add weather-specific items
         addWeatherItems(weatherCondition: weatherCondition, dos: &dos, donts: &donts)
+
+        // Add lifestyle-aware items
+        if alcoholFrequency == "weekly" || alcoholFrequency == "daily" {
+            donts.insert(DoDontItem(text: "Cold drinks after alcohol", priority: 0, whyForYou: "Alcohol generates dampness and heat. Cold drinks on top of that shock your digestion while it's already processing."), at: 0)
+            dos.insert(DoDontItem(text: "Warm congee mornings after", priority: 0, whyForYou: "Congee gently restores your spleen after alcohol taxes it. Think of it as a warm reset for your digestive center."), at: 0)
+        }
+        if smokingStatus == "occasional" || smokingStatus == "regular" {
+            dos.insert(DoDontItem(text: "Moistening foods (pears, honey)", priority: 0, whyForYou: "Smoke dries your lung tissue and throat. Moistening foods replenish the fluids that smoke depletes."), at: 0)
+        }
+
+        // Add step-count-aware items
+        if let steps = stepCount {
+            if steps < 2000 {
+                dos.insert(DoDontItem(text: "Gentle movement", priority: 0, whyForYou: "Low movement days let qi stagnate. Even a short walk helps keep energy circulating."), at: 0)
+            } else if steps > 10000 {
+                dos.insert(DoDontItem(text: "Nourishing recovery food", priority: 0, whyForYou: "High activity depletes qi and fluids. Warm, nourishing food helps your body rebuild what movement used."), at: 0)
+            }
+        }
 
         // Sort by priority and limit to top 4
         dos.sort { $0.priority < $1.priority }

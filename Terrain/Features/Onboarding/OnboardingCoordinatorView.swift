@@ -32,6 +32,7 @@ final class OnboardingCoordinator {
     var currentQuestionIndex: Int = 0
     var scoringResult: TerrainScoringEngine.ScoringResult?
     var safetyPreferences = SafetyPreferences()
+    var userName: String = ""
 
     // Notification settings
     var notificationsEnabled: Bool = false
@@ -178,7 +179,8 @@ struct OnboardingCoordinatorView: View {
                     case .account:
                         AuthView(
                             syncService: syncService,
-                            onContinueWithoutAccount: { coordinator.nextStep() }
+                            onContinueWithoutAccount: { coordinator.nextStep() },
+                            onNameReceived: { name in coordinator.userName = name }
                         )
                         .onChange(of: syncService.isAuthenticated) { _, isAuth in
                             if isAuth { coordinator.nextStep() }
@@ -186,7 +188,8 @@ struct OnboardingCoordinatorView: View {
 
                     case .complete:
                         OnboardingCompleteView(
-                            nickname: coordinator.scoringResult?.primaryType.nickname ?? "Your Type",
+                            displayName: coordinator.userName.isEmpty ? nil : coordinator.userName,
+                            terrainNickname: coordinator.scoringResult?.primaryType.nickname ?? "Your Type",
                             onStart: { completeOnboarding() }
                         )
                     }
@@ -222,6 +225,9 @@ struct OnboardingCoordinatorView: View {
                 QuizResponse(questionId: $0.questionId, optionId: $0.optionId)
             },
             quizVersion: 2,
+            displayName: coordinator.userName.isEmpty ? nil : coordinator.userName,
+            alcoholFrequency: coordinator.quizResponses.first(where: { $0.questionId == "q14_alcohol" })?.optionId,
+            smokingStatus: coordinator.quizResponses.first(where: { $0.questionId == "q15_smoking" })?.optionId,
             safetyPreferences: coordinator.safetyPreferences,
             morningNotificationTime: coordinator.enableMorningNotification ? coordinator.morningNotificationTime : nil,
             eveningNotificationTime: coordinator.enableEveningNotification ? coordinator.eveningNotificationTime : nil,

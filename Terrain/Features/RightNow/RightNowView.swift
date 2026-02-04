@@ -72,6 +72,9 @@ struct RightNowView: View {
                                     onDoThis: {
                                         markSuggestionComplete(need: need)
                                     },
+                                    onUndo: {
+                                        undoSuggestionComplete(need: need)
+                                    },
                                     onSaveGoTo: {
                                         HapticManager.light()
                                     }
@@ -169,6 +172,24 @@ struct RightNowView: View {
         } catch {
             TerrainLogger.persistence.error("Failed to save completion: \(error)")
             HapticManager.error()
+        }
+    }
+
+    private func undoSuggestionComplete(need: QuickNeed) {
+        let suggestionId = "rightnow-\(need.rawValue)"
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        guard let todayLog = dailyLogs.first(where: { calendar.startOfDay(for: $0.date) == today }) else { return }
+
+        todayLog.completedRoutineIds.removeAll { $0 == suggestionId }
+        todayLog.updatedAt = Date()
+
+        do {
+            try modelContext.save()
+            HapticManager.light()
+        } catch {
+            TerrainLogger.persistence.error("Failed to undo completion: \(error)")
         }
     }
 }

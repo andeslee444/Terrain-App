@@ -299,30 +299,86 @@ final class TerrainScoringEngineTests: XCTestCase {
         XCTAssertEqual(result.vector.shenUnsettled, 1)
     }
 
-    // MARK: - Q14 Conditional Inclusion Tests
+    // MARK: - Menstrual Conditional Inclusion Tests (Q16)
 
-    func testQ14IncludedWhenMenstrualComfortGoal() {
+    func testQ16IncludedWhenMenstrualComfortGoal() {
         let goals: Set<Goal> = [.menstrualComfort]
         let filtered = QuizQuestions.questions(for: goals)
 
-        XCTAssertTrue(filtered.contains(where: { $0.id == "q14_menstrual" }))
-        XCTAssertEqual(filtered.count, 14) // 13 base + 1 conditional
+        XCTAssertTrue(filtered.contains(where: { $0.id == "q16_menstrual" }))
+        XCTAssertEqual(filtered.count, 16) // 15 base + 1 conditional
     }
 
-    func testQ14ExcludedWhenNoMenstrualGoal() {
+    func testQ16ExcludedWhenNoMenstrualGoal() {
         let goals: Set<Goal> = [.sleep, .digestion]
         let filtered = QuizQuestions.questions(for: goals)
 
-        XCTAssertFalse(filtered.contains(where: { $0.id == "q14_menstrual" }))
-        XCTAssertEqual(filtered.count, 13) // 13 base only
+        XCTAssertFalse(filtered.contains(where: { $0.id == "q16_menstrual" }))
+        XCTAssertEqual(filtered.count, 15) // 15 base only
     }
 
-    func testQ14EmptyGoalsExcludesMenstrual() {
+    func testQ16EmptyGoalsExcludesMenstrual() {
         let goals: Set<Goal> = []
         let filtered = QuizQuestions.questions(for: goals)
 
-        XCTAssertFalse(filtered.contains(where: { $0.id == "q14_menstrual" }))
-        XCTAssertEqual(filtered.count, 13)
+        XCTAssertFalse(filtered.contains(where: { $0.id == "q16_menstrual" }))
+        XCTAssertEqual(filtered.count, 15)
+    }
+
+    // MARK: - Lifestyle Question Tests
+
+    func testLifestyleQuestionsExist() {
+        let alcoholQ = QuizQuestions.all.first(where: { $0.id == "q14_alcohol" })
+        let smokingQ = QuizQuestions.all.first(where: { $0.id == "q15_smoking" })
+
+        XCTAssertNotNil(alcoholQ, "Alcohol question should exist")
+        XCTAssertNotNil(smokingQ, "Smoking question should exist")
+        XCTAssertEqual(alcoholQ?.options.count, 4)
+        XCTAssertEqual(smokingQ?.options.count, 4)
+    }
+
+    func testLifestyleQuestionsHaveLightWeight() {
+        let alcoholQ = QuizQuestions.all.first(where: { $0.id == "q14_alcohol" })
+        let smokingQ = QuizQuestions.all.first(where: { $0.id == "q15_smoking" })
+
+        XCTAssertEqual(alcoholQ?.weight, 0.4)
+        XCTAssertEqual(smokingQ?.weight, 0.4)
+    }
+
+    func testLifestyleLightWeightDoesNotFlipPrimaryType() {
+        // Start with a clearly neutral-balanced profile, then add daily drinking
+        // The 0.4 weight should nudge but not flip the primary type
+        let responses: [(questionId: String, optionId: String)] = [
+            ("q14_alcohol", "daily")  // coldHeat: +1*0.4=0, dampDry: -2*0.4=-0 (rounds to 0)
+        ]
+        let result = engine.calculateTerrain(from: responses)
+
+        // With only lifestyle answers (light weight), type should remain neutral balanced
+        XCTAssertEqual(result.primaryType, .neutralBalanced,
+                       "Light-weight lifestyle questions alone should not determine primary type")
+    }
+
+    func testAlcoholDailyDelta() {
+        let responses: [(questionId: String, optionId: String)] = [
+            ("q14_alcohol", "daily")
+        ]
+        let result = engine.calculateTerrain(from: responses)
+
+        // Weight 0.4: coldHeat 1*0.4 = 0 (Int truncation), dampDry -2*0.4 = 0 (Int truncation)
+        // These are very small deltas by design
+        XCTAssertTrue(abs(result.vector.coldHeat) <= 1, "Alcohol delta should be small")
+        XCTAssertTrue(abs(result.vector.dampDry) <= 1, "Alcohol dampDry delta should be small")
+    }
+
+    func testSmokingRegularDelta() {
+        let responses: [(questionId: String, optionId: String)] = [
+            ("q15_smoking", "regular")
+        ]
+        let result = engine.calculateTerrain(from: responses)
+
+        // Weight 0.4: coldHeat 1*0.4 = 0, dampDry 2*0.4 = 0
+        XCTAssertTrue(abs(result.vector.coldHeat) <= 1, "Smoking delta should be small")
+        XCTAssertTrue(abs(result.vector.dampDry) <= 1, "Smoking dampDry delta should be small")
     }
 
     // MARK: - Existing Types Still Pass

@@ -19,12 +19,17 @@ struct HomeView: View {
     @Query private var userProfiles: [UserProfile]
     @Query(sort: \DailyLog.date, order: .reverse) private var dailyLogs: [DailyLog]
 
-    // Local state for symptom selection
+    // Local state for symptom selection and mood
     @State private var selectedSymptoms: Set<QuickSymptom> = []
+    @State private var moodRating: Int? = nil
     @State private var hasSkippedCheckIn = false
+    @State private var saveTask: Task<Void, Never>?
 
     // Weather service — fetches once per calendar day
     @State private var weatherService = WeatherService()
+
+    // Health service — fetches step count once per calendar day
+    @State private var healthService = HealthService()
 
     // Insight engine instance
     private let insightEngine = InsightEngine()
@@ -56,7 +61,7 @@ struct HomeView: View {
 
     private var hasCheckedInToday: Bool {
         guard let log = todaysLog else { return false }
-        return !log.quickSymptoms.isEmpty || hasSkippedCheckIn
+        return !log.quickSymptoms.isEmpty || log.moodRating != nil || hasSkippedCheckIn
     }
 
     // MARK: - Generated Content
@@ -74,7 +79,8 @@ struct HomeView: View {
             for: terrainType,
             modifier: modifier,
             symptoms: selectedSymptoms,
-            weatherCondition: todaysLog?.weatherCondition
+            weatherCondition: todaysLog?.weatherCondition,
+            stepCount: healthService.dailyStepCount
         )
     }
 
@@ -87,7 +93,10 @@ struct HomeView: View {
             for: terrainType,
             modifier: modifier,
             symptoms: selectedSymptoms,
-            weatherCondition: todaysLog?.weatherCondition
+            weatherCondition: todaysLog?.weatherCondition,
+            alcoholFrequency: userProfile?.alcoholFrequency,
+            smokingStatus: userProfile?.smokingStatus,
+            stepCount: healthService.dailyStepCount
         )
     }
 
@@ -126,6 +135,13 @@ struct HomeView: View {
                         .padding(.top, theme.spacing.md)
                         .accessibilityAddTraits(.isHeader)
 
+                    // 1.5 Weather + Steps bar
+                    WeatherHealthBarView(
+                        temperatureCelsius: weatherService.temperatureCelsius,
+                        weatherCondition: weatherService.currentCondition,
+                        stepCount: healthService.dailyStepCount
+                    )
+
                     // 2. Headline
                     HeadlineView(content: headline)
                         .accessibilityAddTraits(.isHeader)
@@ -134,6 +150,7 @@ struct HomeView: View {
                     if !hasCheckedInToday {
                         InlineCheckInView(
                             selectedSymptoms: $selectedSymptoms,
+                            moodRating: $moodRating,
                             onSkip: { handleSkipCheckIn() },
                             sortedSymptoms: insightEngine.sortSymptomsByRelevance(for: terrainType, modifier: modifier, weatherCondition: todaysLog?.weatherCondition)
                         )
@@ -182,32 +199,51 @@ struct HomeView: View {
             }
             .task {
                 await weatherService.fetchWeatherIfNeeded(for: todaysLog)
+                await healthService.fetchHealthDataIfNeeded(for: todaysLog)
             }
-            .onChange(of: selectedSymptoms) { _, newValue in
-                saveSymptoms(newValue)
+            .onChange(of: selectedSymptoms) { _, _ in
+                scheduleSave()
+            }
+            .onChange(of: moodRating) { _, _ in
+                scheduleSave()
             }
         }
     }
 
     // MARK: - Actions
 
-    private func handleSkipCheckIn() {
-        hasSkippedCheckIn = true
-        saveSymptoms([])
-    }
-
-    private func loadSavedSymptoms() {
-        if let log = todaysLog, !log.quickSymptoms.isEmpty {
-            selectedSymptoms = Set(log.quickSymptoms)
+    /// Coalesces rapid-fire onChange calls into a single save.
+    /// When confirmSelection() sets both symptoms and mood in sequence,
+    /// the first onChange cancels nothing, the second cancels the first,
+    /// and only one save executes with both values settled.
+    private func scheduleSave() {
+        saveTask?.cancel()
+        saveTask = Task { @MainActor in
+            saveCheckIn(symptoms: selectedSymptoms, mood: moodRating)
         }
     }
 
-    private func saveSymptoms(_ symptoms: Set<QuickSymptom>) {
+    private func handleSkipCheckIn() {
+        hasSkippedCheckIn = true
+        saveCheckIn(symptoms: [], mood: nil)
+    }
+
+    private func loadSavedSymptoms() {
+        if let log = todaysLog {
+            if !log.quickSymptoms.isEmpty {
+                selectedSymptoms = Set(log.quickSymptoms)
+            }
+            moodRating = log.moodRating
+        }
+    }
+
+    private func saveCheckIn(symptoms: Set<QuickSymptom>, mood: Int?) {
         if let log = todaysLog {
             log.quickSymptoms = Array(symptoms)
+            log.moodRating = mood
             log.updatedAt = Date()
         } else {
-            let log = DailyLog(quickSymptoms: Array(symptoms))
+            let log = DailyLog(quickSymptoms: Array(symptoms), moodRating: mood)
             modelContext.insert(log)
         }
 

@@ -218,7 +218,15 @@ struct DoView: View {
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            // Manual large title (replaces NavigationStack to prevent pop gesture sliding)
+            Text("Do")
+                .font(.largeTitle.bold())
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, theme.spacing.lg)
+                .padding(.top, theme.spacing.md)
+                .padding(.bottom, theme.spacing.xs)
+
             ZStack {
                 ScrollView {
                     VStack(spacing: theme.spacing.xl) {
@@ -255,38 +263,37 @@ struct DoView: View {
                     completionOverlay
                 }
             }
-            .navigationTitle("Do")
-            .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showRoutineDetail) {
-                if let routine = selectedRoutine {
-                    RoutineDetailSheet(
-                        level: selectedLevel,
-                        routineModel: routine,
-                        onComplete: { markRoutineComplete() }
-                    )
-                }
-            }
-            .sheet(isPresented: $showMovementPlayer) {
-                MovementPlayerSheet(
+        }
+        .background(theme.colors.background)
+        .sheet(isPresented: $showRoutineDetail) {
+            if let routine = selectedRoutine {
+                RoutineDetailSheet(
                     level: selectedLevel,
-                    onComplete: { markMovementComplete() }
+                    routineModel: routine,
+                    onComplete: { markRoutineComplete() }
                 )
             }
-            .onReceive(timer) { _ in
-                // Tick the avoid-timer countdown every 60 seconds
-                timerTick = Date()
-            }
-            .onAppear {
-                timerCancellable = timer.connect()
-                recomputeEffectiveness()
-            }
-            .onDisappear {
-                timerCancellable?.cancel()
-                timerCancellable = nil
-            }
-            .onChange(of: dailyLogs.count) { _, _ in
-                recomputeEffectiveness()
-            }
+        }
+        .sheet(isPresented: $showMovementPlayer) {
+            MovementPlayerSheet(
+                level: selectedLevel,
+                onComplete: { markMovementComplete() }
+            )
+        }
+        .onReceive(timer) { _ in
+            // Tick the avoid-timer countdown every 60 seconds
+            timerTick = Date()
+        }
+        .onAppear {
+            timerCancellable = timer.connect()
+            recomputeEffectiveness()
+        }
+        .onDisappear {
+            timerCancellable?.cancel()
+            timerCancellable = nil
+        }
+        .onChange(of: dailyLogs.count) { _, _ in
+            recomputeEffectiveness()
         }
     }
 
@@ -457,6 +464,9 @@ struct DoView: View {
                     onDoThis: {
                         markSuggestionComplete(need: need, avoidHours: suggestion.avoidHours)
                     },
+                    onUndo: {
+                        undoSuggestionComplete(need: need)
+                    },
                     onSaveGoTo: {
                         HapticManager.light()
                     }
@@ -512,7 +522,10 @@ struct DoView: View {
             completedIds: todaysCompletedIds,
             cabinetIngredientIds: cabinetIngredientIds,
             routineEffectiveness: cachedEffectivenessMap,
-            weatherCondition: todaysLog?.weatherCondition
+            weatherCondition: todaysLog?.weatherCondition,
+            alcoholFrequency: userProfile?.alcoholFrequency,
+            smokingStatus: userProfile?.smokingStatus,
+            stepCount: todaysLog?.stepCount
         )
     }
 
@@ -645,6 +658,25 @@ struct DoView: View {
         } catch {
             TerrainLogger.persistence.error("Failed to save completion: \(error)")
             HapticManager.error()
+        }
+    }
+
+    private func undoSuggestionComplete(need: QuickNeed) {
+        let suggestionId = "rightnow-\(need.rawValue)"
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        guard let todayLog = dailyLogs.first(where: { calendar.startOfDay(for: $0.date) == today }) else { return }
+
+        todayLog.completedRoutineIds.removeAll { $0 == suggestionId }
+        todayLog.quickFixCompletionTimes.removeValue(forKey: need.rawValue)
+        todayLog.updatedAt = Date()
+
+        do {
+            try modelContext.save()
+            HapticManager.light()
+        } catch {
+            TerrainLogger.persistence.error("Failed to undo completion: \(error)")
         }
     }
 

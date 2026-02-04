@@ -90,7 +90,10 @@ final class SuggestionEngine {
         completedIds: Set<String> = [],
         cabinetIngredientIds: Set<String> = [],
         routineEffectiveness: [String: Double] = [:],
-        weatherCondition: String? = nil
+        weatherCondition: String? = nil,
+        alcoholFrequency: String? = nil,
+        smokingStatus: String? = nil,
+        stepCount: Int? = nil
     ) -> QuickSuggestion {
         var bestCandidate: QuickSuggestion?
 
@@ -150,6 +153,21 @@ final class SuggestionEngine {
 
             // Weather scoring
             score += weatherScore(for: tags, weatherCondition: weatherCondition, modifier: modifier)
+
+            // Lifestyle scoring
+            if (smokingStatus == "occasional" || smokingStatus == "regular") && tags.contains("moistens_dryness") {
+                score += 2
+            }
+            if (alcoholFrequency == "weekly" || alcoholFrequency == "daily") {
+                if tags.contains("dries_damp") { score += 2 }
+                if tags.contains("warming") { score -= 2 }
+            }
+
+            // Step count scoring
+            if let steps = stepCount {
+                if steps < 2000 && tags.contains("moves_qi") { score += 2 }
+                if steps > 10000 && tags.contains("supports_deficiency") { score += 2 }
+            }
 
             // -4 Avoid-tag penalty
             if !tags.isDisjoint(with: avoidTags) {
@@ -239,6 +257,21 @@ final class SuggestionEngine {
 
             // Weather scoring
             score += weatherScore(for: tags, weatherCondition: weatherCondition, modifier: modifier)
+
+            // Lifestyle scoring (routines)
+            if (smokingStatus == "occasional" || smokingStatus == "regular") && tags.contains("moistens_dryness") {
+                score += 2
+            }
+            if (alcoholFrequency == "weekly" || alcoholFrequency == "daily") {
+                if tags.contains("dries_damp") { score += 2 }
+                if tags.contains("warming") { score -= 2 }
+            }
+
+            // Step count scoring (routines)
+            if let steps = stepCount {
+                if steps < 2000 && tags.contains("moves_qi") { score += 2 }
+                if steps > 10000 && tags.contains("supports_deficiency") { score += 2 }
+            }
 
             // -4 Avoid-tag penalty
             if !tags.isDisjoint(with: avoidTags) {

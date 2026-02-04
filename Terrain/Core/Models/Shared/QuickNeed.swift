@@ -227,6 +227,7 @@ struct QuickSuggestionCard: View {
     var isCompleted: Bool = false
     var avoidTimeText: String? = nil
     let onDoThis: () -> Void
+    let onUndo: () -> Void
     let onSaveGoTo: () -> Void
 
     @Environment(\.terrainTheme) private var theme
@@ -276,17 +277,26 @@ struct QuickSuggestionCard: View {
 
             HStack(spacing: theme.spacing.md) {
                 if isCompleted {
-                    HStack(spacing: theme.spacing.sm) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundColor(theme.colors.success)
-                        Text("Completed Today")
-                            .font(theme.typography.labelLarge)
-                            .foregroundColor(theme.colors.success)
+                    Button(action: onUndo) {
+                        HStack(spacing: theme.spacing.sm) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .foregroundColor(theme.colors.success)
+                            Text("Completed Today")
+                                .font(theme.typography.labelLarge)
+                                .foregroundColor(theme.colors.success)
+                            Spacer()
+                            Text("Undo")
+                                .font(theme.typography.caption)
+                                .foregroundColor(theme.colors.textTertiary)
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, theme.spacing.md)
+                    .padding(.horizontal, theme.spacing.md)
                     .background(theme.colors.success.opacity(0.1))
                     .cornerRadius(theme.cornerRadius.large)
+                    .accessibilityLabel("Completed today. Tap to undo.")
                 } else {
                     TerrainPrimaryButton(title: "Do This", action: onDoThis)
                     TerrainTextButton(title: "Save as go-to", action: onSaveGoTo)

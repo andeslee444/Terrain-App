@@ -142,6 +142,90 @@ enum RegionTag: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// User-facing benefit filters for ingredient discovery.
+/// Mirrors the 8 symptom categories from the heatmap (so users see the same
+/// language everywhere) plus a "Beauty" filter. Each benefit maps to
+/// underlying axis tags and/or goals so the user can filter by what they
+/// care about without needing TCM vocabulary.
+enum IngredientBenefit: String, CaseIterable, Identifiable {
+    case sleep
+    case digestion
+    case stress
+    case energy
+    case headache
+    case cramps
+    case stiffness
+    case cold
+    case beauty
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .sleep:     return "Sleep"
+        case .digestion: return "Digestion"
+        case .stress:    return "Stress"
+        case .energy:    return "Energy"
+        case .headache:  return "Headache"
+        case .cramps:    return "Cramps"
+        case .stiffness: return "Stiffness"
+        case .cold:      return "Cold"
+        case .beauty:    return "Beauty"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .sleep:     return "moon.zzz"
+        case .digestion: return "wind"
+        case .stress:    return "brain.head.profile"
+        case .energy:    return "battery.25"
+        case .headache:  return "exclamationmark.circle"
+        case .cramps:    return "waveform.path"
+        case .stiffness: return "figure.walk"
+        case .cold:      return "thermometer.snowflake"
+        case .beauty:    return "sparkles"
+        }
+    }
+
+    /// Axis tags that satisfy this benefit
+    private var matchingTags: [String] {
+        switch self {
+        case .sleep:     return ["calms_shen"]
+        case .digestion: return ["supports_digestion"]
+        case .stress:    return ["calms_shen", "moves_qi"]
+        case .energy:    return ["supports_deficiency"]
+        case .headache:  return ["moves_qi", "cooling"]
+        case .cramps:    return ["moves_qi", "warming"]
+        case .stiffness: return ["moves_qi", "warming"]
+        case .cold:      return ["warming", "supports_deficiency"]
+        case .beauty:    return ["moistens_dryness"]
+        }
+    }
+
+    /// Goals that satisfy this benefit
+    private var matchingGoals: [String] {
+        switch self {
+        case .sleep:     return ["sleep"]
+        case .digestion: return ["digestion"]
+        case .stress:    return ["stress"]
+        case .energy:    return ["energy"]
+        case .headache:  return []
+        case .cramps:    return ["menstrual_comfort"]
+        case .stiffness: return []
+        case .cold:      return []
+        case .beauty:    return ["skin"]
+        }
+    }
+
+    /// Returns true if the ingredient's tags or goals match this benefit
+    func matches(_ ingredient: Ingredient) -> Bool {
+        let hasTag = ingredient.tags.contains { matchingTags.contains($0) }
+        let hasGoal = ingredient.goals.contains { matchingGoals.contains($0) }
+        return hasTag || hasGoal
+    }
+}
+
 /// Ingredient categories
 enum IngredientCategory: String, Codable, CaseIterable, Identifiable {
     case spice

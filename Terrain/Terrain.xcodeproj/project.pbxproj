@@ -111,6 +111,19 @@
 		/* Features/Auth */
 		E10000140000000000000001 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000140000000000000001 /* AuthView.swift */; };
 
+		/* Features/You - Quiz Edit */
+		A1B2C3D4E5F6A7B8C9D0E2F2 /* QuizEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* QuizEditView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2F3 /* QuizEditResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* QuizEditResultView.swift */; };
+
+		/* Core/Services - HealthService */
+		A1B2C3D4E5F6A7B8C9D0E2F4 /* HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F4 /* HealthService.swift */; };
+
+		/* Features/Home/Components - WeatherHealthBarView */
+		A1B2C3D4E5F6A7B8C9D0E2F5 /* WeatherHealthBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* WeatherHealthBarView.swift */; };
+
+		/* Frameworks */
+		A1B2C3D4E5F6A7B8C9D0E2F6 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F6 /* HealthKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+
 		/* Core/Models/Shared - YouViewModels + CommunityStats */
 		E10000040000000000000006 /* YouViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000040000000000000006 /* YouViewModels.swift */; };
 		E10000040000000000000008 /* CommunityStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000040000000000000008 /* CommunityStats.swift */; };
@@ -264,6 +277,19 @@
 		/* Features/Auth */
 		E20000140000000000000001 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 
+		/* Features/You - Quiz Edit */
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* QuizEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizEditView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* QuizEditResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizEditResultView.swift; sourceTree = "<group>"; };
+
+		/* Core/Services - HealthService */
+		A1B2C3D4E5F6A7B8C9D0E1F4 /* HealthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthService.swift; sourceTree = "<group>"; };
+
+		/* Features/Home/Components - WeatherHealthBarView */
+		A1B2C3D4E5F6A7B8C9D0E1F5 /* WeatherHealthBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherHealthBarView.swift; sourceTree = "<group>"; };
+
+		/* Frameworks */
+		A1B2C3D4E5F6A7B8C9D0E1F6 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+
 		/* Core/Models/Shared - YouViewModels + TerrainCopy */
 		E20000040000000000000006 /* YouViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouViewModels.swift; sourceTree = "<group>"; };
 		E20000040000000000000007 /* TerrainCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerrainCopy.swift; sourceTree = "<group>"; };
@@ -331,6 +357,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6A7B8C9D0E2F6 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,7 +376,16 @@
 			children = (
 				E40000000000000000000002 /* Terrain */,
 				E40000000000000000000003 /* Products */,
+				A1B2C3D4E5F6A7B8C9D0E4F0 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6A7B8C9D0E4F0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6A7B8C9D0E1F6 /* HealthKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		E40000000000000000000002 /* Terrain */ = {
@@ -461,6 +497,7 @@
 				E20000060000000000000006 /* SupabaseSyncService.swift */,
 				E20000060000000000000007 /* TerrainLogger.swift */,
 				E20000060000000000000008 /* WeatherService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F4 /* HealthService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -539,6 +576,7 @@
 				E20000100000000000000008 /* ThemeTodayView.swift */,
 				E20000100000000000000009 /* CapsuleStartCTA.swift */,
 				E2000010000000000000000A /* SeasonalCardView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F5 /* WeatherHealthBarView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -555,6 +593,8 @@
 			isa = PBXGroup;
 			children = (
 				E20000120000000000000001 /* YouView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* QuizEditView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F3 /* QuizEditResultView.swift */,
 				E40000030000000000000014 /* Components */,
 			);
 			path = You;
@@ -901,6 +941,10 @@
 				E1000012000000000000000D /* RoutineEffectivenessCard.swift in Sources */,
 				E1000012000000000000000E /* SymptomHeatmapView.swift in Sources */,
 				E10000140000000000000001 /* AuthView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2F2 /* QuizEditView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2F3 /* QuizEditResultView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2F4 /* HealthService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2F5 /* WeatherHealthBarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1048,6 +1092,8 @@
 				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Terrain uses your step count to personalize daily food and activity recommendations for your terrain type.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Terrain does not write health data, but HealthKit requires this description when the capability is enabled.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Terrain uses your location to provide weather-aware wellness guidance personalized to your local conditions.";
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -1078,6 +1124,8 @@
 				DEVELOPMENT_TEAM = 3HC23XC5KA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Terrain uses your step count to personalize daily food and activity recommendations for your terrain type.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Terrain does not write health data, but HealthKit requires this description when the capability is enabled.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Terrain uses your location to provide weather-aware wellness guidance personalized to your local conditions.";
 				INFOPLIST_KEY_NSUserNotificationsUsageDescription = "Terrain sends daily ritual reminders to help you stay consistent with your wellness practice.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

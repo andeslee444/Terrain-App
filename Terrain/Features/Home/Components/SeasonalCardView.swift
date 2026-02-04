@@ -66,6 +66,12 @@ struct SeasonalCardView: View {
                                 .foregroundColor(theme.colors.textSecondary)
                         }
                     }
+
+                    // Weather integration note
+                    Text("Terrain uses your local weather to guide today's food, drink, and activity suggestions.")
+                        .font(theme.typography.caption)
+                        .foregroundColor(theme.colors.textTertiary)
+                        .padding(.top, theme.spacing.xxs)
                 }
                 .padding(.top, theme.spacing.xxs)
                 .transition(.opacity.combined(with: .move(edge: .top)))

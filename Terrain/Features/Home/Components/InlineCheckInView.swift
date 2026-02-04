@@ -9,8 +9,10 @@ import SwiftUI
 
 /// Inline check-in with toggleable symptom chips inside a card, and a "Nothing today" text button.
 /// Uses a 2-column grid with icon+label rectangular chips to differentiate from identity pills.
+/// Selections are staged locally — the card stays visible until the user taps "Confirm".
 struct InlineCheckInView: View {
     @Binding var selectedSymptoms: Set<QuickSymptom>
+    @Binding var moodRating: Int?
     let onSkip: () -> Void
 
     /// Symptoms sorted by relevance to the user's terrain type.
@@ -19,6 +21,12 @@ struct InlineCheckInView: View {
 
     @Environment(\.terrainTheme) private var theme
     @State private var isSkipped = false
+    /// Local staging set — selections stay here until the user confirms.
+    @State private var stagedSymptoms: Set<QuickSymptom> = []
+    /// Local staging for mood slider value (1-10, displayed as continuous slider)
+    @State private var stagedMoodRating: Double = 5.0
+    /// Whether the user has interacted with the mood slider
+    @State private var hasStagedMood: Bool = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 8),
@@ -27,7 +35,51 @@ struct InlineCheckInView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: theme.spacing.sm) {
-            // Header
+            // Mood rating section
+            VStack(alignment: .leading, spacing: theme.spacing.xs) {
+                Text("How are you feeling today?")
+                    .font(theme.typography.bodyMedium)
+                    .foregroundColor(theme.colors.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+
+                HStack(alignment: .center, spacing: theme.spacing.sm) {
+                    Text("1")
+                        .font(theme.typography.caption)
+                        .foregroundColor(theme.colors.textTertiary)
+
+                    Slider(
+                        value: $stagedMoodRating,
+                        in: 1...10,
+                        step: 1
+                    ) {
+                        Text("Mood rating")
+                    }
+                    .tint(theme.colors.accent)
+                    .onChange(of: stagedMoodRating) { _, _ in
+                        if !hasStagedMood {
+                            hasStagedMood = true
+                        }
+                        HapticManager.selection()
+                    }
+                    .accessibilityValue("\(Int(stagedMoodRating)) out of 10")
+
+                    Text("10")
+                        .font(theme.typography.caption)
+                        .foregroundColor(theme.colors.textTertiary)
+                }
+
+                // Display selected number prominently
+                Text("\(Int(stagedMoodRating))")
+                    .font(theme.typography.headlineLarge)
+                    .foregroundColor(theme.colors.accent)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .accessibilityHidden(true) // slider already announces the value
+            }
+
+            Divider()
+                .padding(.vertical, theme.spacing.xxs)
+
+            // Symptom header
             Text("Anything affecting you today?")
                 .font(theme.typography.bodyMedium)
                 .foregroundColor(theme.colors.textPrimary)
@@ -39,7 +91,7 @@ struct InlineCheckInView: View {
                 ForEach(sortedSymptoms, id: \.self) { symptom in
                     SymptomChipButton(
                         symptom: symptom,
-                        isSelected: selectedSymptoms.contains(symptom),
+                        isSelected: stagedSymptoms.contains(symptom),
                         onTap: {
                             toggleSymptom(symptom)
                         }
@@ -47,9 +99,8 @@ struct InlineCheckInView: View {
                 }
             }
 
-            // "Nothing today" — right-aligned, separated from the grid
+            // Bottom row: "Nothing today" left, "Confirm" right
             HStack {
-                Spacer()
                 Button(action: {
                     withAnimation(theme.animation.quick) {
                         isSkipped = true
@@ -63,6 +114,23 @@ struct InlineCheckInView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 .opacity(isSkipped ? 0.5 : 1.0)
+
+                Spacer()
+
+                if !stagedSymptoms.isEmpty || hasStagedMood {
+                    Button(action: confirmSelection) {
+                        Text("Confirm")
+                            .font(theme.typography.labelMedium)
+                            .foregroundColor(theme.colors.textInverted)
+                            .padding(.horizontal, theme.spacing.md)
+                            .padding(.vertical, theme.spacing.xs)
+                            .background(theme.colors.accent)
+                            .cornerRadius(theme.cornerRadius.full)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                    .accessibilityLabel("Confirm symptom selection")
+                }
             }
         }
         .padding(theme.spacing.md)
@@ -71,17 +139,32 @@ struct InlineCheckInView: View {
         .shadow(color: Color.black.opacity(0.04), radius: 1, x: 0, y: 1)
         .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 8)
         .padding(.horizontal, theme.spacing.lg)
+        .onAppear {
+            stagedSymptoms = selectedSymptoms
+            if let existingMood = moodRating {
+                stagedMoodRating = Double(existingMood)
+                hasStagedMood = true
+            }
+        }
     }
 
     private func toggleSymptom(_ symptom: QuickSymptom) {
         withAnimation(theme.animation.quick) {
-            if selectedSymptoms.contains(symptom) {
-                selectedSymptoms.remove(symptom)
+            if stagedSymptoms.contains(symptom) {
+                stagedSymptoms.remove(symptom)
             } else {
-                selectedSymptoms.insert(symptom)
+                stagedSymptoms.insert(symptom)
             }
         }
         HapticManager.selection()
+    }
+
+    private func confirmSelection() {
+        selectedSymptoms = stagedSymptoms
+        if hasStagedMood {
+            moodRating = Int(stagedMoodRating)
+        }
+        HapticManager.success()
     }
 }
 
@@ -128,10 +211,12 @@ struct SymptomChipButton: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var symptoms: Set<QuickSymptom> = [.cold]
+        @State private var mood: Int? = nil
 
         var body: some View {
             InlineCheckInView(
                 selectedSymptoms: $symptoms,
+                moodRating: $mood,
                 onSkip: { print("Skipped") }
             )
         }

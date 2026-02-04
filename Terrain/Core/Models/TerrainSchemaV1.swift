@@ -3,8 +3,14 @@
 //  Terrain
 //
 //  Schema versioning infrastructure for SwiftData migrations.
-//  This is the baseline schema — all 11 model types in their current form.
-//  Future schema changes should add TerrainSchemaV2 etc. with migration stages.
+//  V1: baseline schema — all 11 model types.
+//
+//  Note: Adding a new optional property (e.g. DailyLog.moodRating) does NOT
+//  require a new VersionedSchema. SwiftData performs automatic lightweight
+//  migration for new optional fields — existing rows get nil. A V2 schema
+//  is only needed when renaming/deleting columns or performing custom data
+//  transforms. A previous V2 was removed because both versions referenced
+//  the same live model classes, causing "Duplicate version checksums" crash.
 //
 
 import Foundation
@@ -35,8 +41,6 @@ enum TerrainMigrationPlan: SchemaMigrationPlan {
         [TerrainSchemaV1.self]
     }
 
-    /// No migration stages yet — this is the v1 baseline.
-    /// When you add TerrainSchemaV2, add a MigrationStage here.
     static var stages: [MigrationStage] {
         []
     }

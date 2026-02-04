@@ -116,6 +116,7 @@ struct TerrainTextButton: View {
 
 struct TerrainChip: View {
     let title: String
+    var icon: String? = nil
     var isSelected: Bool = false
     var action: (() -> Void)? = nil
 
@@ -145,15 +146,21 @@ struct TerrainChip: View {
     }
 
     private var chipContent: some View {
-        Text(title)
-            .font(theme.typography.labelSmall)
-            .foregroundColor(isSelected ? theme.colors.textInverted : theme.colors.textSecondary)
-            .padding(.horizontal, theme.spacing.sm)
-            .padding(.vertical, theme.spacing.xxs)
-            .background(isSelected ? theme.colors.accent : theme.colors.backgroundSecondary)
-            .cornerRadius(theme.cornerRadius.full)
-            .accessibilityLabel(title)
-            .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        HStack(spacing: 4) {
+            if let icon = icon {
+                Image(systemName: icon)
+                    .font(.system(size: 10))
+            }
+            Text(title)
+        }
+        .font(theme.typography.labelSmall)
+        .foregroundColor(isSelected ? theme.colors.textInverted : theme.colors.textSecondary)
+        .padding(.horizontal, theme.spacing.sm)
+        .padding(.vertical, theme.spacing.xxs)
+        .background(isSelected ? theme.colors.accent : theme.colors.backgroundSecondary)
+        .cornerRadius(theme.cornerRadius.full)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
